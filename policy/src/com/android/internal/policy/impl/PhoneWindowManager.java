@@ -1049,6 +1049,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if      (navBarOverride.equals("1")) mHasNavigationBar = false;
                 else if (navBarOverride.equals("0")) mHasNavigationBar = true;
             }
+
+            String forceTablet = SystemProperties.get("persist.sys.ui.select");
+            if (! "".equals(forceTablet)) {
+                if      (forceTablet.equals("2")) mHasNavigationBar = false;
+            }
+
+
         } else {
             mHasNavigationBar = false;
         }
