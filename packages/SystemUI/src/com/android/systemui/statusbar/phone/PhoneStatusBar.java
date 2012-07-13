@@ -72,6 +72,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import java.io.File;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+import android.os.Environment;
+import android.graphics.drawable.LevelListDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.util.StateSet;
+import android.os.SystemProperties;
+import android.view.Surface;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
@@ -377,6 +388,21 @@ public class PhoneStatusBar extends BaseStatusBar {
             mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
             mIntruderAlertView.setVisibility(View.GONE);
             mIntruderAlertView.setBar(this);
+        }
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            String IMAGE_FILENAME = "notification_tracking_bg.png";
+            FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
+            StringBuilder builder = new StringBuilder();
+            builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
+            builder.append(File.separator);
+            builder.append(IMAGE_FILENAME);
+            String filePath = builder.toString();
+            Drawable drawable = Drawable.createFromPath(filePath);
+            if (drawable != null) {
+                f.setBackgroundDrawable(drawable);
+            }
         }
 
         updateShowSearchHoldoff();
