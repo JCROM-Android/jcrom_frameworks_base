@@ -46,6 +46,13 @@ import android.widget.LinearLayout;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.StringBuilder;
+import android.os.SystemProperties;
+
+import java.io.File;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+import android.widget.FrameLayout;
+import android.os.Environment;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
@@ -232,6 +239,7 @@ public class NavigationBarView extends LinearLayout {
             (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
                 ? (mVertical ? mBackAltLandIcon : mBackAltIcon)
                 : (mVertical ? mBackLandIcon : mBackIcon));
+
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -360,6 +368,45 @@ public class NavigationBarView extends LinearLayout {
                                                 : findViewById(R.id.rot270);
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            {//port
+                String IMAGE_FILENAME = "navibar_background_port.png";
+                FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
+                StringBuilder builder = new StringBuilder();
+                builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/navibar/");
+                builder.append(File.separator);
+                builder.append(IMAGE_FILENAME);
+                String filePath = builder.toString();
+                Drawable drawable = Drawable.createFromPath(filePath);
+                if (drawable != null) {
+                    f.setBackgroundDrawable(drawable);
+                }else{
+                    f.setBackgroundColor(0xff000000);
+                }
+            }
+            {//land
+                String IMAGE_FILENAME = "navibar_background_land.png";
+                FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
+                StringBuilder builder = new StringBuilder();
+                builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/navibar/");
+                builder.append(File.separator);
+                builder.append(IMAGE_FILENAME);
+                String filePath = builder.toString();
+                Drawable drawable = Drawable.createFromPath(filePath);
+                if (drawable != null) {
+                    f.setBackgroundDrawable(drawable);
+                }else{
+                    f.setBackgroundColor(0xff000000);
+                }
+            }
+        }else{
+               FrameLayout f_port = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
+               f_port.setBackgroundColor(0xff000000);
+               FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
+               f_land.setBackgroundColor(0xff000000);
+        }
     }
 
     public void reorient() {

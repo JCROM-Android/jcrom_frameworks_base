@@ -33,4 +33,7 @@
     <drawable name="system_bar_background">#ff000000</drawable>
     <!-- the darkening filter applied to notifications -->
     <drawable name="notification_icon_area_smoke">#aa000000</drawable>
+    <drawable name="rot0">#FF000000</drawable>
+    <drawable name="rot90">#FF000000</drawable>
+    <drawable name="rot270">#FF000000</drawable>
 </resources>

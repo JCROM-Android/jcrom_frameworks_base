@@ -27,6 +27,7 @@
     >
 
     <FrameLayout android:id="@+id/rot0"
+        android:background="@drawable/rot0"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         >
@@ -142,6 +143,7 @@
     </FrameLayout>
 
     <FrameLayout android:id="@+id/rot90"
+        android:background="@drawable/rot90"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:visibility="gone"
@@ -259,6 +261,7 @@
 
     <!-- not used -->
     <View android:id="@+id/rot270"
+        android:background="@drawable/rot270"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:visibility="gone"
