@@ -97,6 +97,8 @@ public class PhoneStatusBarView extends FrameLayout {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mService.updateExpandedViewPos(BaseStatusBar.EXPANDED_LEAVE_ALONE);
+        mService.updateStatusBarBackground();
+        mService.updateNotificationBackground();
     }
 
     @Override

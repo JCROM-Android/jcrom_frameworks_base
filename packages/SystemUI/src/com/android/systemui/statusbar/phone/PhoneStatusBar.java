@@ -251,6 +251,11 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
+    Drawable mStatusBarDrawable = null;
+    Drawable mStatusBarLandDrawable = null;
+    Drawable mNotificationTrackingDrawable = null;
+    Drawable mNotificationTrackingLandDrawable = null;
+
     private int mNavigationIconHints = 0;
     private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
         @Override
@@ -390,26 +395,14 @@ public class PhoneStatusBar extends BaseStatusBar {
             mIntruderAlertView.setBar(this);
         }
 
-        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
-        if (forceHobby.equals("true")) {
-            String IMAGE_FILENAME = "notification_tracking_bg.png";
-            FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
-            StringBuilder builder = new StringBuilder();
-            builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
-            builder.append(File.separator);
-            builder.append(IMAGE_FILENAME);
-            String filePath = builder.toString();
-            Drawable drawable = Drawable.createFromPath(filePath);
-            if (drawable != null) {
-                f.setBackgroundDrawable(drawable);
-            }
-        }
-
         updateShowSearchHoldoff();
 
         mStatusBarView.mService = this;
 
         mChoreographer = Choreographer.getInstance();
+
+        prepareStatusBarBackground();
+        updateStatusBarBackground();
 
         try {
             boolean showNav = mWindowManager.hasNavigationBar();
@@ -466,6 +459,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         TickerView tickerView = (TickerView)mStatusBarView.findViewById(R.id.tickerText);
         tickerView.mTicker = mTicker;
+
+        prepareNotificationBackground();
+        updateNotificationBackground();
 
         mCloseView = (CloseDragHandle)mStatusBarWindow.findViewById(R.id.close);
         mCloseView.mService = this;
@@ -2484,4 +2480,110 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void setBounds(Rect bounds) {
         }
     }
+
+//JCROM
+    public boolean requiresRotation() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display dp = wm.getDefaultDisplay();
+        DisplayMetrics dpm = new DisplayMetrics();
+        dp.getRealMetrics(dpm);
+
+        float[] dims = {dpm.widthPixels, dpm.heightPixels};
+        float degrees = getDegreesForRotation(dp.getRotation());
+
+        return degrees > 0;
+    }
+
+    public float getDegreesForRotation(int value) {
+        switch (value) {
+        case Surface.ROTATION_90:
+            return 360f - 90f;
+        case Surface.ROTATION_180:
+            return 360f - 180f;
+        case Surface.ROTATION_270:
+            return 360f - 270f;
+        }
+        return 0f;
+    }
+
+    public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        return Drawable.createFromPath(filePath);
+    }
+
+    public void prepareStatusBarBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background.png");
+            mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land.png");
+        }
+    }
+
+    public void updateStatusBarBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        FrameLayout f = (FrameLayout) mStatusBarView.findViewById(R.id.status_bar_background);
+        if (forceHobby.equals("true")) {
+            if (requiresRotation()) {
+                if(mStatusBarLandDrawable != null){
+                    f.setBackgroundDrawable(mStatusBarLandDrawable);
+                }else if(mStatusBarDrawable != null){
+                    f.setBackgroundDrawable(mStatusBarDrawable);
+                }else{
+	            f.setBackgroundColor(0xff000000);
+                }
+            }else{
+                if(mStatusBarDrawable != null){
+                    f.setBackgroundDrawable(mStatusBarDrawable);
+                }else{
+	            f.setBackgroundColor(0xff000000);
+                }
+            }
+        }else{
+            f.setBackgroundColor(0xff000000);
+        }
+    }
+
+    public void prepareNotificationBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mNotificationTrackingDrawable = getDrawableFromFile("notification", "notification_tracking_bg.png");
+            mNotificationTrackingLandDrawable = getDrawableFromFile("notification", "notification_tracking_bg_land.png");
+        }
+    }
+
+    public void updateNotificationBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
+            if (requiresRotation()) {
+                if(mNotificationTrackingLandDrawable != null){
+                    f.setBackgroundDrawable(mNotificationTrackingLandDrawable);
+                }else if(mNotificationTrackingDrawable != null){
+                    f.setBackgroundDrawable(mNotificationTrackingDrawable);
+                }
+            }else{
+                if(mNotificationTrackingDrawable != null){
+                    f.setBackgroundDrawable(mNotificationTrackingDrawable);
+                }
+            }
+        }
+    }
+
+
+    public Drawable getNotificationDrawableFromFile(String MY_FILE_FORMAT, int i, String suffix) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_FORMAT);
+        String filePathFormat = builder.toString();
+
+        String filePath = String.format(filePathFormat, i, suffix);
+
+        return Drawable.createFromPath(filePath);
+    }
+
 }
