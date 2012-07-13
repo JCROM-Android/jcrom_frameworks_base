@@ -375,7 +375,7 @@ public class NavigationBarView extends LinearLayout {
                 String IMAGE_FILENAME = "navibar_background_port.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
                 StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/navibar/");
+                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
                 builder.append(File.separator);
                 builder.append(IMAGE_FILENAME);
                 String filePath = builder.toString();
@@ -390,7 +390,7 @@ public class NavigationBarView extends LinearLayout {
                 String IMAGE_FILENAME = "navibar_background_land.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
                 StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/navibar/");
+                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
                 builder.append(File.separator);
                 builder.append(IMAGE_FILENAME);
                 String filePath = builder.toString();
