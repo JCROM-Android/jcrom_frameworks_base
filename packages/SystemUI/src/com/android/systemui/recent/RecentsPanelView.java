@@ -27,6 +27,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
@@ -58,6 +60,11 @@ import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import java.io.File;
+import android.graphics.drawable.Drawable;
+import android.os.Environment;
+import android.os.SystemProperties;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -66,6 +73,7 @@ import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import java.util.ArrayList;
+import android.graphics.Rect;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
         StatusBarPanel, Animator.AnimatorListener, View.OnTouchListener {
@@ -101,6 +109,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mRecentItemLayoutId;
     private boolean mFirstScreenful = true;
     private boolean mHighEndGfx;
+    private boolean mMyFrame = false;
 
     public static interface OnRecentsPanelVisibilityChangedListener {
         public void onRecentsPanelVisibilityChanged(boolean visible);
@@ -230,6 +239,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     public RecentsPanelView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mMyFrame = true;
+        }
         updateValuesFromResources();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
@@ -539,6 +552,34 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
 
     private void updateThumbnail(ViewHolder h, Bitmap thumbnail, boolean show, boolean anim) {
         if (thumbnail != null) {
+
+            if ( true == mMyFrame ) {
+                String MY_FRAME_FILE = "my_frame.png";
+                StringBuilder builder = new StringBuilder();
+                builder.append(Environment.getDataDirectory().toString() + "/theme/frame/");
+                builder.append(File.separator);
+                builder.append(MY_FRAME_FILE);
+                String filePath = builder.toString();
+                Drawable drawable = Drawable.createFromPath(filePath);
+                if( null != drawable ) {
+                    Bitmap myframe = ((BitmapDrawable) drawable).getBitmap();
+                    Canvas c = new Canvas( thumbnail );
+
+                    int w0 = myframe.getWidth();
+                    int h0 = myframe.getHeight();
+                    int w1 = c.getWidth();
+
+                    float rate = 1.0F;
+
+                    if(w0 != w1 &&  w0!=0){
+                        rate = w1/(float)w0;
+                    }
+                    Rect src=new Rect(0, 0, w0, h0);
+                    Rect dst=new Rect(0, 0, w1, (int)(h0*rate));
+
+                    c.drawBitmap(myframe, src, dst, null );
+                }
+            }
             // Should remove the default image in the frame
             // that this now covers, to improve scrolling speed.
             // That can't be done until the anim is complete though.
