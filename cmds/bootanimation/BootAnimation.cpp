@@ -17,11 +17,13 @@
 #define LOG_TAG "BootAnimation"
 
 #include <stdint.h>
+#include <string.h>
 #include <sys/types.h>
 #include <math.h>
 #include <fcntl.h>
 #include <utils/misc.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include <cutils/properties.h>
 
@@ -51,6 +53,10 @@
 
 #include "BootAnimation.h"
 
+#define MY_BOOTANIMATION_FILE "/data/theme/bootanime/bootanimation.zip"
+#define MY_BOOTANIMATION_DIR "/data/theme/bootanime/"
+#define MY_BOOTANIMATION_FILE1 "/sdcard/mytheme/"
+#define MY_BOOTANIMATION_FILE2 "/bootanime/bootanimation.zip"
 #define USER_BOOTANIMATION_FILE "/data/local/bootanimation.zip"
 #define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
 #define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
@@ -274,7 +280,51 @@ status_t BootAnimation::readyToRun() {
 
     bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
 
-    if ((encryptedAnimation &&
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get("persist.sys.force.hobby", property, NULL) > 0) {
+        if (strcmp(property, "true") == 0) {
+            if ((access(MY_BOOTANIMATION_FILE, R_OK) == 0) &&
+                (mZip.open(MY_BOOTANIMATION_FILE) == NO_ERROR)) {
+                mAndroidAnimation = false;
+            } else {
+                DIR *bootanime_dir = opendir(MY_BOOTANIMATION_DIR);
+                if (bootanime_dir != NULL) {
+                    int file_cnt = 0;
+                    char *zip_list[256];
+                    struct dirent *dir_file;
+                    dir_file = readdir(bootanime_dir);
+                    while(dir_file != NULL){
+                        char *file_name = dir_file->d_name;
+                        if ((strncmp(file_name, "bootanimation_",14) == 0) &&
+                           (strncmp(strrchr(file_name,'.'),".zip",4) == 0)) {
+                            zip_list[file_cnt] = file_name;
+                            file_cnt++;
+                        }
+                        dir_file = readdir(bootanime_dir);
+                    }
+                    closedir(bootanime_dir);
+
+                    if (file_cnt > 0) {
+                        srand((unsigned)time(NULL));
+
+                        char bootanime_file[256];
+                        memset(bootanime_file, 0, 256);
+                        strcat(bootanime_file, MY_BOOTANIMATION_DIR);
+                        strcat(bootanime_file, zip_list[rand() % file_cnt]);
+                        ALOGD("select %s",bootanime_file );
+
+                        if ((access(bootanime_file, R_OK) == 0) &&
+                                (mZip.open(const_cast<char*>(bootanime_file)) == NO_ERROR)) {
+                            mAndroidAnimation = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ( false != mAndroidAnimation ) {
+        if ((encryptedAnimation &&
             (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
             (mZip.open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE) == NO_ERROR)) ||
 
@@ -283,7 +333,9 @@ status_t BootAnimation::readyToRun() {
 
             ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
             (mZip.open(SYSTEM_BOOTANIMATION_FILE) == NO_ERROR))) {
-        mAndroidAnimation = false;
+
+            mAndroidAnimation = false;
+        }
     }
 
     return NO_ERROR;
@@ -404,6 +456,7 @@ bool BootAnimation::movie()
     char const* s = desString.string();
 
     Animation animation;
+    srand((unsigned)time(NULL));
 
     // Parse the description file
     for (;;) {
@@ -429,7 +482,22 @@ bool BootAnimation::movie()
             part.path = path;
             animation.parts.add(part);
         }
+        if (sscanf(l, "r %d %d %[^\r\n]", &count, &pause, path) == 3) {
+            int i = 0;
+            char *path_str[256];
+            char *savepath = NULL;
+            path_str[i] = strtok_r(path, " ,", &savepath);
+            while (path_str[i] != NULL) {
+                i++;
+                path_str[i] = strtok_r(NULL, " ,", &savepath);
+            }
 
+            Animation::Part part;
+            part.count = count;
+            part.pause = pause;
+            part.path = path_str[rand() % i];
+            animation.parts.add(part);
+        }
         s = ++endl;
     }
 
