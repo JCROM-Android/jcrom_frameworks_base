@@ -1290,4 +1290,14 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth音声"</string>
     <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"完了"</string>
+
+<!-- JCROM -->
+    <string name="reboot_reboot" msgid="4266614107412865058">"再起動"</string>
+    <string name="reboot_recovery" msgid="4266614107412865068">"recovery mode で起動"</string>
+    <string name="reboot_bootloader" msgid="4266614107412865078">"fastboot mode で起動"</string>
+    <string name="reboot_system" product="tablet" msgid="4266614107412865088">"端末の再起動"</string>
+    <string name="reboot_system" product="default" msgid="4266614107412865098">"端末の再起動"</string>
+    <string name="reboot_progress" msgid="4266614107412865108">再起動中\u2026</string>
+    <string name="global_action_reboot" msgid="4266614107412865118">再起動</string>
+
 </resources>
