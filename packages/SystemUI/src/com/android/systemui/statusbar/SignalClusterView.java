@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
@@ -149,8 +150,8 @@ public class SignalClusterView
 
         if (mWifiVisible) {
             mWifiGroup.setVisibility(View.VISIBLE);
-            mWifi.setImageResource(mWifiStrengthId);
-            mWifiActivity.setImageResource(mWifiActivityId);
+            mWifi.setImageDrawable(getCustomImage(mWifiStrengthId));
+            mWifiActivity.setImageDrawable(getCustomImage(mWifiActivityId));
             mWifiGroup.setContentDescription(mWifiDescription);
         } else {
             mWifiGroup.setVisibility(View.GONE);
@@ -163,9 +164,9 @@ public class SignalClusterView
 
         if (mMobileVisible && !mIsAirplaneMode) {
             mMobileGroup.setVisibility(View.VISIBLE);
-            mMobile.setImageResource(mMobileStrengthId);
-            mMobileActivity.setImageResource(mMobileActivityId);
-            mMobileType.setImageResource(mMobileTypeId);
+            mMobile.setImageDrawable(getCustomImage(mMobileStrengthId));
+            mMobileActivity.setImageDrawable(getCustomImage(mMobileActivityId));
+            mMobileType.setImageDrawable(getCustomImage(mMobileTypeId));
             mMobileGroup.setContentDescription(mMobileTypeDescription + " " + mMobileDescription);
         } else {
             mMobileGroup.setVisibility(View.GONE);
@@ -191,6 +192,16 @@ public class SignalClusterView
 
         mMobileType.setVisibility(
                 !mWifiVisible ? View.VISIBLE : View.GONE);
+    }
+
+    public Drawable getCustomImage(int resid) {
+        if (mNC != null) {
+            return mNC.getCustomImage(resid);
+        } else if (resid != 0) {
+            return getContext().getResources().getDrawable(resid);
+        } else {
+            return null;
+        }
     }
 }
 

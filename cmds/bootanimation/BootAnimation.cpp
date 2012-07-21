@@ -473,16 +473,8 @@ bool BootAnimation::movie()
             animation.height = height;
             animation.fps = fps;
         }
-        else if (sscanf(l, " %c %d %d %s", &pathType, &count, &pause, path) == 4) {
+        else if (sscanf(l, " %c %d %d %[^\r\n]", &pathType, &count, &pause, path) == 4) {
             //LOGD("> type=%c, count=%d, pause=%d, path=%s", pathType, count, pause, path);
-            Animation::Part part;
-            part.playUntilComplete = pathType == 'c';
-            part.count = count;
-            part.pause = pause;
-            part.path = path;
-            animation.parts.add(part);
-        }
-        if (sscanf(l, "r %d %d %[^\r\n]", &count, &pause, path) == 3) {
             int i = 0;
             char *path_str[256];
             char *savepath = NULL;
@@ -491,8 +483,10 @@ bool BootAnimation::movie()
                 i++;
                 path_str[i] = strtok_r(NULL, " ,", &savepath);
             }
+            if (i == 0) continue;
 
             Animation::Part part;
+            part.playUntilComplete = pathType == 'c';
             part.count = count;
             part.pause = pause;
             part.path = path_str[rand() % i];

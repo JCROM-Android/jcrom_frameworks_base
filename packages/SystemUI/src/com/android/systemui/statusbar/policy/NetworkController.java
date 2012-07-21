@@ -19,12 +19,14 @@ package com.android.systemui.statusbar.policy;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -33,6 +35,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -1114,7 +1117,7 @@ public class NetworkController extends BroadcastReceiver {
                     v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(mPhoneSignalIconId);
+                    v.setImageDrawable(getCustomImage(mPhoneSignalIconId));
                     v.setContentDescription(mContentDescriptionPhoneSignal);
                 }
             }
@@ -1126,7 +1129,7 @@ public class NetworkController extends BroadcastReceiver {
             N = mDataDirectionIconViews.size();
             for (int i=0; i<N; i++) {
                 final ImageView v = mDataDirectionIconViews.get(i);
-                v.setImageResource(mDataDirectionIconId);
+                v.setImageDrawable(getCustomImage(mDataDirectionIconId));
                 v.setContentDescription(mContentDescriptionDataType);
             }
         }
@@ -1141,7 +1144,7 @@ public class NetworkController extends BroadcastReceiver {
                     v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(mWifiIconId);
+                    v.setImageDrawable(getCustomImage(mWifiIconId));
                     v.setContentDescription(mContentDescriptionWifi);
                 }
             }
@@ -1157,7 +1160,7 @@ public class NetworkController extends BroadcastReceiver {
                     v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(mWimaxIconId);
+                    v.setImageDrawable(getCustomImage(mWimaxIconId));
                     v.setContentDescription(mContentDescriptionWimax);
                 }
            }
@@ -1168,7 +1171,7 @@ public class NetworkController extends BroadcastReceiver {
             N = mCombinedSignalIconViews.size();
             for (int i=0; i<N; i++) {
                 final ImageView v = mCombinedSignalIconViews.get(i);
-                v.setImageResource(combinedSignalIconId);
+                v.setImageDrawable(getCustomImage(combinedSignalIconId));
                 v.setContentDescription(mContentDescriptionCombinedSignal);
             }
         }
@@ -1183,7 +1186,7 @@ public class NetworkController extends BroadcastReceiver {
                     v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(mDataTypeIconId);
+                    v.setImageDrawable(getCustomImage(mDataTypeIconId));
                     v.setContentDescription(mContentDescriptionDataType);
                 }
             }
@@ -1202,7 +1205,7 @@ public class NetworkController extends BroadcastReceiver {
                     v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(combinedActivityIconId);
+                    v.setImageDrawable(getCustomImage(combinedActivityIconId));
                     v.setContentDescription(mContentDescriptionDataType);
                 }
             }
@@ -1375,4 +1378,67 @@ public class NetworkController extends BroadcastReceiver {
         }
     }
 
+    final HashMap<String,Drawable> mCustomImage = new HashMap<String,Drawable>();
+    public Drawable getCustomImage(int resid) {
+        String filename = null;
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            switch (resid) {
+            case R.drawable.stat_sys_wifi_signal_0:
+                filename = "wifi_0.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_1:
+                filename = "wifi_1.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_2:
+                filename = "wifi_2.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_3:
+                filename = "wifi_3.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_4:
+                filename = "wifi_4.png";
+                break;
+
+            case R.drawable.stat_sys_wifi_signal_1_fully:
+                filename = "wifi_full_1.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_2_fully:
+                filename = "wifi_full_2.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_3_fully:
+                filename = "wifi_full_3.png";
+                break;
+            case R.drawable.stat_sys_wifi_signal_4_fully:
+                filename = "wifi_full_4.png";
+                break;
+
+            case R.drawable.stat_sys_wifi_in:
+                filename = "wifi_in.png";
+                break;
+            case R.drawable.stat_sys_wifi_out:
+                filename = "wifi_out.png";
+                break;
+            case R.drawable.stat_sys_wifi_inout:
+                filename = "wifi_inout.png";
+                break;
+            }
+        }
+
+        Drawable d = null;
+        if (filename != null) {
+            if (mCustomImage.containsKey(filename)) {
+                d = mCustomImage.get(filename);
+            } else {
+                String filepath = Environment.getDataDirectory().toString() + "/theme/statusbar/" + filename;
+                d = Drawable.createFromPath(filepath);
+                mCustomImage.put(filename, d);
+            }
+        }
+        if ((d == null) && (resid != 0)) {
+            d = mContext.getResources().getDrawable(resid);
+        }
+        return d;
+    }
 }
