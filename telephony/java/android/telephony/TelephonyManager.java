@@ -32,6 +32,7 @@ import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.List;
+import java.util.HashMap;
 
 /**
  * Provides access to information about the telephony services on
@@ -364,7 +365,7 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkOperatorName() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ALPHA);
+        return SystemProperties_get(TelephonyProperties.PROPERTY_OPERATOR_ALPHA);
     }
 
     /**
@@ -375,7 +376,7 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkOperator() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
+        return SystemProperties_get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
     }
 
     /**
@@ -385,7 +386,7 @@ public class TelephonyManager {
      * Availability: Only when user registered to a network.
      */
     public boolean isNetworkRoaming() {
-        return "true".equals(SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
+        return "true".equals(SystemProperties_get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
     }
 
     /**
@@ -397,7 +398,7 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkCountryIso() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY);
+        return SystemProperties_get(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY);
     }
 
     /** Network type is unknown */
@@ -611,7 +612,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_READY
      */
     public int getSimState() {
-        String prop = SystemProperties.get(TelephonyProperties.PROPERTY_SIM_STATE);
+        String prop = SystemProperties_get(TelephonyProperties.PROPERTY_SIM_STATE);
         if ("ABSENT".equals(prop)) {
             return SIM_STATE_ABSENT;
         }
@@ -641,7 +642,7 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperator() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC);
+        return SystemProperties_get(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC);
     }
 
     /**
@@ -652,14 +653,14 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperatorName() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA);
+        return SystemProperties_get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA);
     }
 
     /**
      * Returns the ISO country code equivalent for the SIM provider's country code.
      */
     public String getSimCountryIso() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY);
+        return SystemProperties_get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY);
     }
 
     /**
@@ -1160,5 +1161,52 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             return null;
         }
+    }
+
+    private String SystemProperties_get(String name) {
+        if (!hasRealSim() && "true".equals(SystemProperties.get(TelephonyProperties.PROPERTY_SIM_EMULATION))) {
+            if (TelephonyProperties.PROPERTY_SIM_STATE.equals(name)) {
+                return "READY";
+            }
+            if (sEmulationKeyMap.containsKey(name)) {
+                name = sEmulationKeyMap.get(name);
+            }
+            if (!"true".equals(SystemProperties.get(TelephonyProperties.EMULATION_OPERATOR_ISROAMING))) {
+                // not roaming => Network operator is SIM operator
+                if (TelephonyProperties.EMULATION_OPERATOR_ALPHA.equals(name)) {
+                    name = TelephonyProperties.EMULATION_ICC_OPERATOR_ALPHA;
+                } else
+                if (TelephonyProperties.EMULATION_OPERATOR_NUMERIC.equals(name)) {
+                    name = TelephonyProperties.EMULATION_ICC_OPERATOR_NUMERIC;
+                } else
+                if (TelephonyProperties.EMULATION_OPERATOR_ISO_COUNTRY.equals(name)) {
+                    name = TelephonyProperties.EMULATION_ICC_OPERATOR_ISO_COUNTRY;
+                }
+            }
+        }
+        return SystemProperties.get(name);
+    }
+
+    private boolean hasRealSim() {
+        String prop = SystemProperties.get(TelephonyProperties.PROPERTY_SIM_STATE);
+        return !"ABSENT".equals(prop);
+    }
+
+    private static final HashMap<String,String> sEmulationKeyMap = new HashMap<String,String>();
+    static {
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC,
+                             TelephonyProperties.EMULATION_OPERATOR_NUMERIC);
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
+                             TelephonyProperties.EMULATION_OPERATOR_ALPHA);
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
+                             TelephonyProperties.EMULATION_OPERATOR_ISO_COUNTRY);
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING,
+                             TelephonyProperties.EMULATION_OPERATOR_ISROAMING);
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC,
+                             TelephonyProperties.EMULATION_ICC_OPERATOR_NUMERIC);
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA,
+                             TelephonyProperties.EMULATION_ICC_OPERATOR_ALPHA);
+        sEmulationKeyMap.put(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY,
+                             TelephonyProperties.EMULATION_ICC_OPERATOR_ISO_COUNTRY);
     }
 }
