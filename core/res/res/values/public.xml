@@ -1116,12 +1116,17 @@
   <java-symbol type="layout" name="notification_action_tombstone" />
   <java-symbol type="layout" name="notification_intruder_content" />
   <java-symbol type="layout" name="notification_template_base" />
+  <java-symbol type="layout" name="notification_template_trans_base" />
   <java-symbol type="layout" name="notification_template_big_base" />
+  <java-symbol type="layout" name="notification_template_big_trans_base" />
   <java-symbol type="layout" name="notification_template_big_picture" />
+  <java-symbol type="layout" name="notification_template_big_trans_picture" />
   <java-symbol type="layout" name="notification_template_big_text" />
+  <java-symbol type="layout" name="notification_template_big_trans_text" />
   <java-symbol type="layout" name="notification_template_part_time" />
   <java-symbol type="layout" name="notification_template_part_chronometer" />
   <java-symbol type="layout" name="notification_template_inbox" />
+  <java-symbol type="layout" name="notification_template_trans_inbox" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />

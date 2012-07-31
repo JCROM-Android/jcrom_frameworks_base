@@ -82,6 +82,9 @@ import android.graphics.drawable.StateListDrawable;
 import android.util.StateSet;
 import android.os.SystemProperties;
 import android.view.Surface;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
@@ -101,6 +104,8 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
+
+import com.android.systemui.statusbar.LatestItemView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -144,6 +149,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private float mExpandAccelPx; // classic value: 2000px/s/s
     private float mCollapseAccelPx; // classic value: 2000px/s/s (will be negated to collapse "up")
+
+    private int mNotificationPictureNum = 0;
+    private boolean mNotificationPictureUse = false;
 
     private float mFlingGestureMaxOutputVelocityPx; // how fast can it really go? (should be a little 
                                                     // faster than mSelfCollapseVelocityPx)
@@ -255,6 +263,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     Drawable mStatusBarLandDrawable = null;
     Drawable mNotificationTrackingDrawable = null;
     Drawable mNotificationTrackingLandDrawable = null;
+    LevelListDrawable mlevelListDrawable = null;
+    LevelListDrawable mlevelListLandDrawable = null;
 
     private int mNavigationIconHints = 0;
     private final Animator.AnimatorListener mMakeIconsInvisible = new AnimatorListenerAdapter() {
@@ -508,6 +518,41 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
+            String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
+            String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
+
+            StringBuilder builder = new StringBuilder();
+            //builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/notification/");
+            builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
+            builder.append(File.separator);
+            builder.append(MY_NOTIFICATION_FORMAT);
+            String filePathFormat = builder.toString();
+
+            int i = 0;
+            while (i < 100) {
+                String pathPressed = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+                String pathNormal = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+
+                Drawable drawablePressed = Drawable.createFromPath(pathPressed);
+                Drawable drawableNormal = Drawable.createFromPath(pathNormal);
+                if ((null == drawablePressed) || (null == drawableNormal)) {
+                    break;
+                } else {
+                    i++;
+                }
+            }
+            mNotificationPictureNum = i;
+            if (mNotificationPictureNum > 0 ) {
+                mNotificationPictureUse = true;
+                prepareLevelListDrawable();
+            } else {
+                mNotificationPictureUse = false;
+            }
+        }
 
         return mStatusBarView;
     }
@@ -2585,5 +2630,113 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         return Drawable.createFromPath(filePath);
     }
+
+    private void prepareLevelListDrawable() {
+
+        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
+        String MY_NOTIFICATION_LAND_FORMAT = "notification_item_background_land_%02d_%s.png";
+        String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
+        String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
+
+        mlevelListDrawable = new LevelListDrawable();
+        mlevelListLandDrawable = new LevelListDrawable();
+
+        for (int i = 0; i < mNotificationPictureNum; i++) {
+            StateListDrawable stateListLandDrawable = new StateListDrawable();
+            StateListDrawable stateListDrawable = new StateListDrawable();
+            Drawable drawablePressed=null;
+            Drawable drawableNormal=null;
+
+            // for landscape
+            drawablePressed = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_LAND_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            if(null == drawablePressed){
+                drawablePressed = getNotificationDrawableFromFile(
+                               MY_NOTIFICATION_FORMAT,
+                               i,
+                               MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            }
+            stateListLandDrawable.addState(new int[] { android.R.attr.state_pressed }, drawablePressed);
+
+            drawableNormal = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_LAND_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+            if(null == drawableNormal){
+                drawableNormal = getNotificationDrawableFromFile(
+                               MY_NOTIFICATION_FORMAT,
+                               i,
+                               MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+            }
+            stateListLandDrawable.addState(StateSet.WILD_CARD, drawableNormal);
+
+            mlevelListLandDrawable.addLevel(i, i, stateListLandDrawable);
+
+            // for portrait
+            drawablePressed = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            stateListDrawable.addState(new int[] { android.R.attr.state_pressed }, drawablePressed);
+
+            drawableNormal = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+            stateListDrawable.addState(StateSet.WILD_CARD, drawableNormal);
+
+            mlevelListDrawable.addLevel(i, i, stateListDrawable);
+        }
+    }
+
+    public void registerLevelListDrawable(View v) {
+        if(requiresRotation()){
+            if(mlevelListLandDrawable != null){
+		LevelListDrawable drawable = (LevelListDrawable) mlevelListLandDrawable.getConstantState().newDrawable();
+                int nowLevel = (int) (Math.random() * mNotificationPictureNum);
+                drawable.setLevel(nowLevel);
+                ((LatestItemView)v).setDrawable(drawable.getCurrent());
+            }
+        }else{
+            if(mlevelListDrawable != null){
+		LevelListDrawable drawable = (LevelListDrawable) mlevelListDrawable.getConstantState().newDrawable();
+                int nowLevel = (int) (Math.random() * mNotificationPictureNum);
+                drawable.setLevel(nowLevel);
+                ((LatestItemView)v).setDrawable(drawable.getCurrent());
+            }
+        }
+    }
+
+
+    @Override
+    protected void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
+
+        if (sbn.notification.contentView.getLayoutId() !=
+                com.android.internal.R.layout.notification_template_base) {
+            int version = 0;
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.pkg, 0);
+                version = info.targetSdkVersion;
+            } catch (NameNotFoundException ex) {
+                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.pkg, ex);
+            }
+            if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
+                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+            } else {
+                if (true != mNotificationPictureUse) {
+                    content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
+                }
+            }
+        }
+
+        if (true == mNotificationPictureUse){
+            registerLevelListDrawable(content);
+        }else{
+            content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
+        }
+    }
+
 
 }
