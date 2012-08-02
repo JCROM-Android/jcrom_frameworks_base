@@ -61,6 +61,7 @@ import android.widget.RemoteViews;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.android.internal.os.AutoRun;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
@@ -245,7 +246,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.gravity = getStatusBarGravity();
         lp.setTitle("SystemBar");
         lp.packageName = mContext.getPackageName();
-        WindowManagerImpl.getDefault().addView(sb, lp);
+        if (AutoRun.hasSystemNavBar()) {
+            WindowManagerImpl.getDefault().addView(sb, lp);
+        }
     }
 
     protected void addPanelWindows() {

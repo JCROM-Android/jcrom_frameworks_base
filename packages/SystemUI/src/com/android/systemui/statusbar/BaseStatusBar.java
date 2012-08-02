@@ -54,6 +54,7 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.PopupMenu;
 
+import com.android.internal.os.AutoRun;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -254,6 +255,24 @@ public abstract class BaseStatusBar extends SystemUI implements
                    switches[2],
                    switches[3]
                    ));
+        }
+
+        // auto exec from autorun.conf
+        final String packageName = AutoRun.getExecPackage();
+        final String className = AutoRun.getExecClass();
+        if (!"".equals(packageName) && !"".equals(className)) {
+            mHandler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_MAIN);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.setClassName(packageName, className);
+                            mContext.startActivity(intent);
+                        } catch (Exception e) {
+                            Log.e("AutoRun", "Cannot start activity", e);
+                        }
+                    }
+                });
         }
     }
 

@@ -59,6 +59,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.android.internal.R;
+import com.android.internal.os.AutoRun;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
@@ -1077,11 +1078,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 else if (navBarOverride.equals("0")) mHasNavigationBar = true;
             }
 
-            String forceTablet = SystemProperties.get("persist.sys.ui.select");
+            String forceTablet = AutoRun.getUIType();
+            if ("".equals(forceTablet)) {
+                forceTablet = SystemProperties.get("persist.sys.ui.select");
+            }
             if (! "".equals(forceTablet)) {
                 if      (forceTablet.equals("2")) mHasNavigationBar = false;
             }
 
+            if (!AutoRun.hasNavigationBar()) {
+                mHasNavigationBar = false;
+            }
 
         } else {
             mHasNavigationBar = false;
