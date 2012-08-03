@@ -374,12 +374,7 @@ public class NavigationBarView extends LinearLayout {
             {//port
                 String IMAGE_FILENAME = "navibar_background_port.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = loadNaviKeyImage(IMAGE_FILENAME);
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
@@ -389,12 +384,7 @@ public class NavigationBarView extends LinearLayout {
             {//land
                 String IMAGE_FILENAME = "navibar_background_land.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = loadNaviKeyImage(IMAGE_FILENAME);
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
@@ -412,19 +402,19 @@ public class NavigationBarView extends LinearLayout {
             setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.expand, "ic_sysbar_expand_land.png");
 
             Drawable drawable;
-            drawable = getNaviKeyImage("ic_sysbar_back.png");
+            drawable = loadNaviKeyImage("ic_sysbar_back.png");
             if (drawable != null) {
                 mBackIcon = drawable;
             }
-            drawable = getNaviKeyImage("ic_sysbar_back_land.png");
+            drawable = loadNaviKeyImage("ic_sysbar_back_land.png");
             if (drawable != null) {
                 mBackLandIcon = drawable;
             }
-            drawable = getNaviKeyImage("ic_sysbar_back_ime.png");
+            drawable = loadNaviKeyImage("ic_sysbar_back_ime.png");
             if (drawable != null) {
                 mBackAltIcon = drawable;
             }
-            drawable = getNaviKeyImage("ic_sysbar_back_ime_land.png");
+            drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png");
             if (drawable != null) {
                 mBackAltLandIcon = drawable;
             }
@@ -437,7 +427,7 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    private Drawable getNaviKeyImage(String filename) {
+    private Drawable loadNaviKeyImage(String filename) {
         String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
         return Drawable.createFromPath(filepath);
     }
@@ -445,7 +435,7 @@ public class NavigationBarView extends LinearLayout {
     private void setButtonImage(View parent, int id, String filename) {
         View view = parent.findViewById(id);
         if (view instanceof ImageView) {
-            Drawable drawable = getNaviKeyImage(filename);
+            Drawable drawable = loadNaviKeyImage(filename);
             if (drawable != null) {
                 ((ImageView)view).setImageDrawable(drawable);
             }
