@@ -392,14 +392,10 @@ public class NavigationBarView extends LinearLayout {
                 }
             }
 
-            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.recent_apps, "ic_sysbar_recent.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.recent_apps, "ic_sysbar_recent_land.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.mymenu, "ic_sysbar_menu.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.mymenu, "ic_sysbar_menu_land.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.home, "ic_sysbar_home.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.home, "ic_sysbar_home_land.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.expand, "ic_sysbar_expand.png");
-            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.expand, "ic_sysbar_expand_land.png");
+            setupButtons(R.id.recent_apps, "ic_sysbar_recent.png", "ic_sysbar_recent_land.png");
+            setupButtons(R.id.mymenu,      "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png");
+            setupButtons(R.id.home,        "ic_sysbar_home.png",   "ic_sysbar_home_land.png");
+            setupButtons(R.id.expand,      "ic_sysbar_expand.png", "ic_sysbar_expand_land.png");
 
             Drawable drawable;
             drawable = loadNaviKeyImage("ic_sysbar_back.png");
@@ -430,6 +426,20 @@ public class NavigationBarView extends LinearLayout {
     private Drawable loadNaviKeyImage(String filename) {
         String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
         return Drawable.createFromPath(filepath);
+    }
+
+    private void setupButtons(int id, String filenameHorz, String filenameVert) {
+        for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
+            View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
+            if (view instanceof LinearLayout) {
+                boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
+                if (vert) {
+                    setButtonImage(view, id, filenameVert);
+                } else {
+                    setButtonImage(view, id, filenameHorz);
+                }
+            }
+        }
     }
 
     private void setButtonImage(View parent, int id, String filename) {
