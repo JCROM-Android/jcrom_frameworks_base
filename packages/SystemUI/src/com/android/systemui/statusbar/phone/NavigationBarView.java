@@ -374,12 +374,7 @@ public class NavigationBarView extends LinearLayout {
             {//port
                 String IMAGE_FILENAME = "navibar_background_port.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = loadNaviKeyImage(IMAGE_FILENAME);
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
@@ -389,23 +384,71 @@ public class NavigationBarView extends LinearLayout {
             {//land
                 String IMAGE_FILENAME = "navibar_background_land.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = loadNaviKeyImage(IMAGE_FILENAME);
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
                     f.setBackgroundColor(0xff000000);
                 }
             }
+
+            setupButtons(R.id.recent_apps, "ic_sysbar_recent.png", "ic_sysbar_recent_land.png");
+            setupButtons(R.id.mymenu,      "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png");
+            setupButtons(R.id.home,        "ic_sysbar_home.png",   "ic_sysbar_home_land.png");
+            setupButtons(R.id.expand,      "ic_sysbar_expand.png", "ic_sysbar_expand_land.png");
+
+            Drawable drawable;
+            drawable = loadNaviKeyImage("ic_sysbar_back.png");
+            if (drawable != null) {
+                mBackIcon = drawable;
+            }
+            drawable = loadNaviKeyImage("ic_sysbar_back_land.png");
+            if (drawable != null) {
+                mBackLandIcon = drawable;
+            }
+            drawable = loadNaviKeyImage("ic_sysbar_back_ime.png");
+            if (drawable != null) {
+                mBackAltIcon = drawable;
+            }
+            drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png");
+            if (drawable != null) {
+                mBackAltLandIcon = drawable;
+            }
+
         }else{
                FrameLayout f_port = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
                f_port.setBackgroundColor(0xff000000);
                FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
                f_land.setBackgroundColor(0xff000000);
+        }
+    }
+
+    private Drawable loadNaviKeyImage(String filename) {
+        String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
+        return Drawable.createFromPath(filepath);
+    }
+
+    private void setupButtons(int id, String filenameHorz, String filenameVert) {
+        for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
+            View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
+            if (view instanceof LinearLayout) {
+                boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
+                if (vert) {
+                    setButtonImage(view, id, filenameVert);
+                } else {
+                    setButtonImage(view, id, filenameHorz);
+                }
+            }
+        }
+    }
+
+    private void setButtonImage(View parent, int id, String filename) {
+        View view = parent.findViewById(id);
+        if (view instanceof ImageView) {
+            Drawable drawable = loadNaviKeyImage(filename);
+            if (drawable != null) {
+                ((ImageView)view).setImageDrawable(drawable);
+            }
         }
     }
 
