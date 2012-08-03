@@ -401,11 +401,54 @@ public class NavigationBarView extends LinearLayout {
                     f.setBackgroundColor(0xff000000);
                 }
             }
+
+            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.recent_apps, "ic_sysbar_recent.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.recent_apps, "ic_sysbar_recent_land.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.mymenu, "ic_sysbar_menu.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.mymenu, "ic_sysbar_menu_land.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.home, "ic_sysbar_home.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.home, "ic_sysbar_home_land.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_0],  R.id.expand, "ic_sysbar_expand.png");
+            setButtonImage(mRotatedViews[Surface.ROTATION_90], R.id.expand, "ic_sysbar_expand_land.png");
+
+            Drawable drawable;
+            drawable = getNaviKeyImage("ic_sysbar_back.png");
+            if (drawable != null) {
+                mBackIcon = drawable;
+            }
+            drawable = getNaviKeyImage("ic_sysbar_back_land.png");
+            if (drawable != null) {
+                mBackLandIcon = drawable;
+            }
+            drawable = getNaviKeyImage("ic_sysbar_back_ime.png");
+            if (drawable != null) {
+                mBackAltIcon = drawable;
+            }
+            drawable = getNaviKeyImage("ic_sysbar_back_ime_land.png");
+            if (drawable != null) {
+                mBackAltLandIcon = drawable;
+            }
+
         }else{
                FrameLayout f_port = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
                f_port.setBackgroundColor(0xff000000);
                FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
                f_land.setBackgroundColor(0xff000000);
+        }
+    }
+
+    private Drawable getNaviKeyImage(String filename) {
+        String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
+        return Drawable.createFromPath(filepath);
+    }
+
+    private void setButtonImage(View parent, int id, String filename) {
+        View view = parent.findViewById(id);
+        if (view instanceof ImageView) {
+            Drawable drawable = getNaviKeyImage(filename);
+            if (drawable != null) {
+                ((ImageView)view).setImageDrawable(drawable);
+            }
         }
     }
 
