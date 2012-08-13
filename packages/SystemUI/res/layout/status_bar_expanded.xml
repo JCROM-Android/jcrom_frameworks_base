@@ -56,16 +56,22 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fadingEdge="none"
+            android:fillViewport="true"
             android:overScrollMode="ifContentScrolls"
             android:layout_marginTop="@dimen/notification_panel_header_height"
             >
-            <com.android.systemui.statusbar.policy.NotificationRowLayout
-                android:id="@+id/latestItems"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                systemui:rowHeight="@dimen/notification_row_min_height"
-                />
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                >
+                <com.android.systemui.statusbar.policy.NotificationRowLayout
+                    android:id="@+id/latestItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    systemui:rowHeight="@dimen/notification_row_min_height"
+                    />
+            </LinearLayout>
         </ScrollView>
     </FrameLayout>
 
