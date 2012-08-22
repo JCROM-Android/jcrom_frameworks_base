@@ -31,6 +31,7 @@ import android.widget.FrameLayout;
 public class TabletStatusBarView extends FrameLayout {
     private Handler mHandler;
 
+    TabletStatusBar mService = null;
     private final int MAX_PANELS = 5;
     private final View[] mIgnoreChildren = new View[MAX_PANELS];
     private final View[] mPanels = new View[MAX_PANELS];
@@ -143,4 +144,13 @@ public class TabletStatusBarView extends FrameLayout {
         mIgnoreChildren[index] = ignore;
         mPanels[index] = panel;
     }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        if(mService != null){
+            mService.updateSystemBarBackground();
+        }
+    }
+
 }
