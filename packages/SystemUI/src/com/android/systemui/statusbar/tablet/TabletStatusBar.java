@@ -72,7 +72,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.widget.FrameLayout;
-import android.util.DisplayMetrics;
 
 import com.android.internal.os.AutoRun;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -1746,25 +1745,8 @@ public class TabletStatusBar extends BaseStatusBar implements
     public boolean requiresRotation() {
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         Display dp = wm.getDefaultDisplay();
-        DisplayMetrics dpm = new DisplayMetrics();
-        dp.getRealMetrics(dpm);
 
-        float[] dims = {dpm.widthPixels, dpm.heightPixels};
-        float degrees = getDegreesForRotation(dp.getRotation());
-
-        return degrees > 0;
-    }
-
-    public float getDegreesForRotation(int value) {
-        switch (value) {
-        case Surface.ROTATION_90:
-            return 360f - 90f;
-        case Surface.ROTATION_180:
-            return 360f - 180f;
-        case Surface.ROTATION_270:
-            return 360f - 270f;
-        }
-        return 0f;
+        return dp.getRotation()==Surface.ROTATION_90 || dp.getRotation()==Surface.ROTATION_270;
     }
 
     public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
