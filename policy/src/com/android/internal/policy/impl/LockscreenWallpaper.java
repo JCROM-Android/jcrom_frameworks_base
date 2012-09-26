@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.os.SystemProperties;
 import android.os.Environment;
+import android.view.WindowManager;
+import android.view.Display;
+import android.view.Surface;
 
 class LockscreenWallpaper extends FrameLayout {
 
@@ -36,17 +39,18 @@ class LockscreenWallpaper extends FrameLayout {
             mLockScreenWallpaperImage.setScaleType(ScaleType.CENTER_CROP);
             addView(mLockScreenWallpaperImage, -1, -1);
 
-            String MY_FRAME_FILE = "lockscreen_wallpaper.png";
-            StringBuilder builder = new StringBuilder();
-            builder.append(Environment.getDataDirectory().toString() + "/theme/lockscreen/");
-            builder.append(File.separator);
-            builder.append(MY_FRAME_FILE);
-            String filePath = builder.toString();
+            Drawable drawable = null;
+            if (requiresRotation()) {
+                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper_land.png");
+                if (drawable == null) {
+                    drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper.png");
+                }
+            } else {
+                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper.png");
+            }
 
-            bitmapWallpaper = BitmapFactory.decodeFile(filePath);
-            Drawable d = new BitmapDrawable(getResources(), bitmapWallpaper);
-            if ( null != d ) {
-                mLockScreenWallpaperImage.setImageDrawable(d);
+            if ( null != drawable ) {
+                mLockScreenWallpaperImage.setImageDrawable(drawable);
             } else {
                 removeAllViews();
             }
@@ -62,5 +66,22 @@ class LockscreenWallpaper extends FrameLayout {
 
         System.gc();
         super.onDetachedFromWindow();
+    }
+
+    public boolean requiresRotation() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display dp = wm.getDefaultDisplay();
+        return dp.getRotation()==Surface.ROTATION_90 || dp.getRotation()==Surface.ROTATION_270;
+    }
+
+    public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        bitmapWallpaper = BitmapFactory.decodeFile(filePath);
+        Drawable d = new BitmapDrawable(getResources(), bitmapWallpaper);
+        return d;
     }
 }
