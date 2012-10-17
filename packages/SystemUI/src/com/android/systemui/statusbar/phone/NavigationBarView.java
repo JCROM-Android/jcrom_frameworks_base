@@ -259,11 +259,11 @@ public class NavigationBarView extends LinearLayout {
 
         setSlippery(disableHome && disableRecent && disableBack);
 
-        getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
-        getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
-		getMyMenuButton()   .setVisibility(disableMyMenu       ? View.INVISIBLE : View.VISIBLE);
-        getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
-        getExpandButton(). setVisibility(disableExpand     ? View.INVISIBLE : View.VISIBLE);
+        getBackButton()   .setVisibility(disableBack   ? View.INVISIBLE : View.VISIBLE);
+        getHomeButton()   .setVisibility(disableHome   ? View.INVISIBLE : View.VISIBLE);
+        getMyMenuButton() .setVisibility(disableMyMenu ? View.INVISIBLE : View.VISIBLE);
+        getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
+        getExpandButton() .setVisibility(disableExpand ? View.INVISIBLE : View.VISIBLE);
     }
 
     public void setSlippery(boolean newSlippery) {
@@ -310,6 +310,8 @@ public class NavigationBarView extends LinearLayout {
 
         final View navButtons = mCurrentView.findViewById(R.id.nav_buttons);
         final View lowLights = mCurrentView.findViewById(R.id.lights_out);
+        
+        lowLights.setBackgroundColor(0xff000000);
 
         // ok, everyone, stop it right there
         navButtons.animate().cancel();

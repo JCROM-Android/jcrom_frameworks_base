@@ -39,6 +39,7 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.ImageView;
+import android.os.SystemProperties;
 
 import com.android.systemui.R;
 
@@ -46,8 +47,8 @@ public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
 
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
-    final float BUTTON_QUIESCENT_ALPHA = 0.70f;
-
+    final float BUTTON_QUIESCENT_ALPHA;
+    
     long mDownTime;
     int mCode;
     int mTouchSlop;
@@ -79,6 +80,13 @@ public class KeyButtonView extends ImageView {
 
     public KeyButtonView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
+
+        String navikeyAlphaStr = SystemProperties.get("persist.sys.alpha.navikey");
+        if(navikeyAlphaStr.equals("true")){
+            BUTTON_QUIESCENT_ALPHA = 1.0f;
+        }else{
+            BUTTON_QUIESCENT_ALPHA = 0.70f;
+        }
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.KeyButtonView,
                 defStyle, 0);
