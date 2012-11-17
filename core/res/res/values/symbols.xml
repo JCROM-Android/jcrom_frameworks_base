@@ -1813,4 +1813,14 @@
   <!-- From PinyinIME(!!!) -->
   <java-symbol type="string" name="inputMethod" />
 
+  <!-- JCROM -->
+  <java-symbol type="layout" name="screen" />
+  <java-symbol type="layout" name="screenb" />
+  <java-symbol type="layout" name="screenb_action_bar" />
+  <java-symbol type="layout" name="screenb_custom_title" />
+  <java-symbol type="layout" name="screenb_progress" />
+  <java-symbol type="layout" name="screenb_simple" />
+  <java-symbol type="layout" name="screenb_title" />
+  <java-symbol type="layout" name="screenb_title_icons" />
+
 </resources>
