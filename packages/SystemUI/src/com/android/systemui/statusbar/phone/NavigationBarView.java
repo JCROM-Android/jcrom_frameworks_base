@@ -140,12 +140,34 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.menu);
     }
 
+    public View getMyMenuButton() {
+        return mCurrentView.findViewById(R.id.mymenu);
+    }
+
     public View getBackButton() {
         return mCurrentView.findViewById(R.id.back);
     }
 
     public View getHomeButton() {
         return mCurrentView.findViewById(R.id.home);
+    }
+
+    public View getExpandButton() {
+        return mCurrentView.findViewById(R.id.expand);
+    }
+
+    public void expand() {
+		try {
+	        mBarService.expandNotificationsPanel();
+        } catch (android.os.RemoteException ex) {
+        }
+    }
+
+    public void collapse() {
+		try {
+			mBarService.collapsePanels();
+        } catch (android.os.RemoteException ex) {
+        }
     }
 
     // for when home is disabled, but search isn't
@@ -239,9 +261,11 @@ public class NavigationBarView extends LinearLayout {
 
         final boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
         final boolean disableRecent = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
+        final boolean disableMyMenu = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
         final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
+        final boolean disableExpand = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT/*STATUS_BAR_DISABLE_EXPAND*/) != 0);
 
         if (SLIPPERY_WHEN_DISABLED) {
             setSlippery(disableHome && disableRecent && disableBack && disableSearch);
@@ -260,8 +284,10 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
-
         getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
+        getMyMenuButton() .setVisibility(disableMyMenu ? View.INVISIBLE : View.VISIBLE);
+        getExpandButton() .setVisibility(disableExpand ? View.INVISIBLE : View.VISIBLE);
+
     }
 
     public void setSlippery(boolean newSlippery) {
@@ -281,15 +307,19 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show) {
-        setMenuVisibility(show, false);
+//      setMenuVisibility(show, false);
+        return;
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
+/*
         if (!force && mShowMenu == show) return;
 
         mShowMenu = show;
 
         getMenuButton().setVisibility(mShowMenu ? View.VISIBLE : View.INVISIBLE);
+*/
+        return;
     }
 
     public void setLowProfile(final boolean lightsOut) {
@@ -491,6 +521,8 @@ public class NavigationBarView extends LinearLayout {
         final View home = getHomeButton();
         final View recent = getRecentsButton();
         final View menu = getMenuButton();
+        final View mymenu = getMyMenuButton();
+        final View expand = getExpandButton();
 
         pw.println("      back: "
                 + PhoneStatusBar.viewInfo(back)
@@ -507,6 +539,14 @@ public class NavigationBarView extends LinearLayout {
         pw.println("      menu: "
                 + PhoneStatusBar.viewInfo(menu)
                 + " " + visibilityToString(menu.getVisibility())
+                );
+        pw.println("      mymenu: "
+                + PhoneStatusBar.viewInfo(mymenu)
+                + " " + visibilityToString(mymenu.getVisibility())
+                );
+        pw.println("      expand: "
+                + PhoneStatusBar.viewInfo(expand)
+                + " " + visibilityToString(expand.getVisibility())
                 );
         pw.println("    }");
     }
