@@ -1444,4 +1444,11 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
+    <string name="reboot_reboot" msgid="4266614107412865058">"再起動"</string>
+    <string name="reboot_recovery" msgid="4266614107412865068">"recovery mode で起動"</string>
+    <string name="reboot_bootloader" msgid="4266614107412865078">"fastboot mode で起動"</string>
+    <string name="reboot_system" product="tablet" msgid="4266614107412865088">"端末の再起動"</string>
+    <string name="reboot_system" product="default" msgid="4266614107412865098">"端末の再起動"</string>
+    <string name="reboot_progress" msgid="4266614107412865108">再起動中\u2026</string>
+    <string name="global_action_reboot" msgid="4266614107412865118">再起動</string>
 </resources>
