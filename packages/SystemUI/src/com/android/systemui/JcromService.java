@@ -32,6 +32,7 @@ public class JcromService extends Activity {
         super.onCreate(savedInstanceState);
         try {
             Runtime.getRuntime().exec("/system/xbin/busybox pkill -f com.android.systemui");
+            finish();
         } catch (Exception e) {
             e.printStackTrace();
         }
