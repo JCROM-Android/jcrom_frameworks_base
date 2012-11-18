@@ -89,6 +89,13 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mBar.updateStatusBarBackground();
+        mBar.updateNotificationBackground();
+    }
+
+    @Override
     public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
         if (super.onRequestSendAccessibilityEvent(child, event)) {
             // The status bar is very small so augment the view that the user is touching

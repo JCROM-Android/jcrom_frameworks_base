@@ -35,12 +35,18 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.SystemProperties;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -50,7 +56,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.view.Display;
+import android.view.Surface;
 import android.widget.RemoteViews.OnClickHandler;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 
 import com.android.internal.R;
 import com.android.internal.policy.impl.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -101,6 +112,10 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private boolean mSafeModeEnabled;
 
+    private ImageView mLockScreenWallpaperImage;
+
+    Bitmap bitmapWallpaper;
+
     /*package*/ interface TransportCallback {
         void onListenerDetached();
         void onListenerAttached();
@@ -139,6 +154,8 @@ public class KeyguardHostView extends KeyguardViewBase {
             mDisabledFeatures = getDisabledFeatures(dpm);
             mCameraDisabled = dpm.getCameraDisabled(null);
         }
+
+        setLockScreenWallpaper();
 
         mSafeModeEnabled = LockPatternUtils.isSafeModeEnabled();
 
@@ -1511,5 +1528,49 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         mActivityLauncher.launchActivityWithAnimation(
                 intent, false, opts.toBundle(), null, null);
+    }
+
+    public void setLockScreenWallpaper() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mLockScreenWallpaperImage = new ImageView(getContext());
+            mLockScreenWallpaperImage.setScaleType(ScaleType.CENTER_CROP);
+            addView(mLockScreenWallpaperImage, -1, -1);
+
+            Drawable drawable = null;
+            if (requiresRotation()) {
+                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper_land.png");
+                if (drawable == null) {
+                    drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper.png");
+                }
+            } else {
+                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper.png");
+            }
+
+            if ( null != drawable ) {
+                mLockScreenWallpaperImage.setImageDrawable(drawable);
+            } else {
+                removeAllViews();
+            }
+        } else {
+            removeAllViews();
+        }
+    }
+
+    public boolean requiresRotation() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display dp = wm.getDefaultDisplay();
+        return dp.getRotation()==Surface.ROTATION_90 || dp.getRotation()==Surface.ROTATION_270;
+    }
+
+    public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        bitmapWallpaper = BitmapFactory.decodeFile(filePath);
+        Drawable d = new BitmapDrawable(getResources(), bitmapWallpaper);
+        return d;
     }
 }

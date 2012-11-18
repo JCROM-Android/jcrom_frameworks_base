@@ -41,6 +41,12 @@
         android:visibility="gone"
         />
 
+    <FrameLayout
+        android:id="@+id/status_bar_background"
+        android:background="@drawable/status_bar_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

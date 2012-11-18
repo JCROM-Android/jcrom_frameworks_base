@@ -38,6 +38,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
+import android.os.SystemProperties;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -801,12 +802,20 @@ public class Notification implements Parcelable
     public void setLatestEventInfo(Context context,
             CharSequence contentTitle, CharSequence contentText, PendingIntent contentIntent) {
         // TODO: rewrite this to use Builder
-        RemoteViews contentView = new RemoteViews(context.getPackageName(),
-                R.layout.notification_template_base);
+        RemoteViews contentView=null;
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            contentView = new RemoteViews(context.getPackageName(),
+                    R.layout.notification_template_trans_base);
+        }else{
+            contentView = new RemoteViews(context.getPackageName(),
+                    R.layout.notification_template_base);
+        }
+
         if (this.icon != 0) {
             contentView.setImageViewResource(R.id.icon, this.icon);
         }
-        if (priority < PRIORITY_LOW) {
+        if (priority < PRIORITY_LOW && !forceHobby.equals("true")) {
             contentView.setInt(R.id.icon,
                     "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
             contentView.setInt(R.id.status_bar_latest_event_content,
@@ -1423,7 +1432,8 @@ public class Notification implements Parcelable
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
                 smallIconImageViewId = R.id.right_icon;
             }
-            if (mPriority < PRIORITY_LOW) {
+            String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+            if (mPriority < PRIORITY_LOW && !forceHobby.equals("true")) {
                 contentView.setInt(R.id.icon,
                         "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
                 contentView.setInt(R.id.status_bar_latest_event_content,
@@ -1537,7 +1547,12 @@ public class Notification implements Parcelable
             if (mContentView != null) {
                 return mContentView;
             } else {
-                return applyStandardTemplate(R.layout.notification_template_base, true); // no more special large_icon flavor
+                String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+                if (forceHobby.equals("true")) {
+                    return applyStandardTemplate(R.layout.notification_template_trans_base, true); // no more special large_icon flavor
+                }else{
+                    return applyStandardTemplate(R.layout.notification_template_base, true); // no more special large_icon flavor
+                }
             }
         }
 
@@ -1557,8 +1572,13 @@ public class Notification implements Parcelable
 
         private RemoteViews makeBigContentView() {
             if (mActions.size() == 0) return null;
+            String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+            if (forceHobby.equals("true")) {
+                return applyStandardTemplateWithActions(R.layout.notification_template_big_trans_base);
+            }else{
+                return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
+            }
 
-            return applyStandardTemplateWithActions(R.layout.notification_template_big_base);
         }
 
         private RemoteViews generateActionButton(Action action) {
@@ -1784,7 +1804,14 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            RemoteViews contentView = getStandardView(R.layout.notification_template_big_picture);
+            RemoteViews contentView = null;
+
+            String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+            if (forceHobby.equals("true")) {
+                contentView = getStandardView(R.layout.notification_template_big_trans_picture);
+            }else{
+                contentView = getStandardView(R.layout.notification_template_big_picture);
+            }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
@@ -1861,7 +1888,14 @@ public class Notification implements Parcelable
             final boolean hadThreeLines = (mBuilder.mContentText != null && mBuilder.mSubText != null);
             mBuilder.mContentText = null;
 
-            RemoteViews contentView = getStandardView(R.layout.notification_template_big_text);
+            RemoteViews contentView = null;
+
+            String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+            if (forceHobby.equals("true")) {
+                contentView = getStandardView(R.layout.notification_template_big_trans_text);
+            }else{
+                contentView = getStandardView(R.layout.notification_template_big_text);
+            }
             
             if (hadThreeLines) {
                 // vertical centering
@@ -1942,7 +1976,15 @@ public class Notification implements Parcelable
         private RemoteViews makeBigContentView() {
             // Remove the content text so line3 disappears unless you have a summary
             mBuilder.mContentText = null;
-            RemoteViews contentView = getStandardView(R.layout.notification_template_inbox);
+
+            RemoteViews contentView = null;
+
+            String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+            if (forceHobby.equals("true")) {
+                contentView  = getStandardView(R.layout.notification_template_trans_inbox);
+            }else{
+                contentView  = getStandardView(R.layout.notification_template_inbox);
+            }
 
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
