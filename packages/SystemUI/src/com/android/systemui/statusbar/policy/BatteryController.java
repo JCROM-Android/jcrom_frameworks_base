@@ -23,7 +23,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.os.BatteryManager;
+import android.os.Environment;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,6 +40,8 @@ public class BatteryController extends BroadcastReceiver {
     private Context mContext;
     private ArrayList<ImageView> mIconViews = new ArrayList<ImageView>();
     private ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
+    private LevelListDrawable mBatteryImages = null;
+    private LevelListDrawable mPluggedImages = null;
 
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
@@ -50,6 +56,34 @@ public class BatteryController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(this, filter);
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mBatteryImages = getBatteryImages("battery_%d.png");
+            mPluggedImages = getBatteryImages("battery_plugged_%d.png");
+        }
+    }
+
+    private LevelListDrawable getBatteryImages(String filename) {
+        LevelListDrawable images = new LevelListDrawable();
+        String format = Environment.getDataDirectory().toString() + "/theme/statusbar/" + filename;
+        int minlevel = 0;
+        Drawable maxd = null;
+
+        for (int level = 0; level <= 100; level++) {
+            String path = String.format(format, level);
+            Drawable d = Drawable.createFromPath(path);
+            if (d != null) {
+                images.addLevel(minlevel, level, d);
+                minlevel = level + 1;
+                maxd = d;
+            }
+        }
+
+        if ((maxd != null) && (minlevel <= 100)) {
+            images.addLevel(minlevel, 100, maxd);
+        }
+        return (maxd != null) ? images : null;
     }
 
     public void addIconView(ImageView v) {
@@ -71,10 +105,15 @@ public class BatteryController extends BroadcastReceiver {
             final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             final int icon = plugged ? R.drawable.stat_sys_battery_charge 
                                      : R.drawable.stat_sys_battery;
+            final LevelListDrawable images = plugged ? mPluggedImages : mBatteryImages;
             int N = mIconViews.size();
             for (int i=0; i<N; i++) {
                 ImageView v = mIconViews.get(i);
-                v.setImageResource(icon);
+                if (images != null) {
+                    v.setImageDrawable(images);
+                } else {
+                    v.setImageResource(icon);
+                }
                 v.setImageLevel(level);
                 v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
                         level));
