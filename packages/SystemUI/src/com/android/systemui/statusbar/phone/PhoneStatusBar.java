@@ -2563,7 +2563,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public boolean requiresRotation() {
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         Display dp = wm.getDefaultDisplay();
-        Slog.d(TAG, "[JCROM] requiresRotation : " + dp.getRotation());
+
         return dp.getRotation()==Surface.ROTATION_90 || dp.getRotation()==Surface.ROTATION_270;
     }
 
@@ -2589,7 +2589,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         FrameLayout f = (FrameLayout) mStatusBarView.findViewById(R.id.status_bar_background);
         if (forceHobby.equals("true")) {
             if (requiresRotation()) {
-                Slog.d(TAG, "[JCROM] updateStatusBarBackground  landscape");
                 if(mStatusBarLandDrawable != null){
                     f.setBackgroundDrawable(mStatusBarLandDrawable);
                 }else if(mStatusBarDrawable != null){
@@ -2598,7 +2597,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 	            f.setBackgroundColor(0xff000000);
                 }
             }else{
-                Slog.d(TAG, "[JCROM] updateStatusBarBackground  portrait");
                 if(mStatusBarDrawable != null){
                     f.setBackgroundDrawable(mStatusBarDrawable);
                 }else{
@@ -2623,14 +2621,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (forceHobby.equals("true")) {
             FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
             if (requiresRotation()) {
-                Slog.d(TAG, "[JCROM] updateNotificationBackground  landscape");
                 if(mNotificationTrackingLandDrawable != null){
                     f.setBackgroundDrawable(mNotificationTrackingLandDrawable);
                 }else if(mNotificationTrackingDrawable != null){
                     f.setBackgroundDrawable(mNotificationTrackingDrawable);
                 }
             }else{
-                Slog.d(TAG, "[JCROM] updateNotificationBackground  portrait");
                 if(mNotificationTrackingDrawable != null){
                     f.setBackgroundDrawable(mNotificationTrackingDrawable);
                 }
