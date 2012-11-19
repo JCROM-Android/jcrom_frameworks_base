@@ -24,8 +24,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 
-public class TakeScreenshotService extends Service {
-    private static final String TAG = "TakeScreenshotService";
+public class TakeScreenshotFrameService extends Service {
+    private static final String TAG = "TakeScreenshotFrameService";
     static final int SCREEN_SHOT_NORMAL = 1;
     static final int SCREEN_SHOT_FRAME = 2;
 
@@ -38,7 +38,7 @@ public class TakeScreenshotService extends Service {
                 case 1:
                     final Messenger callback = msg.replyTo;
                     if (mScreenshot == null) {
-                        mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
+                        mScreenshot = new GlobalScreenshot(TakeScreenshotFrameService.this);
                     }
                     mScreenshot.takeScreenshot(new Runnable() {
                         @Override public void run() {
@@ -48,7 +48,7 @@ public class TakeScreenshotService extends Service {
                             } catch (RemoteException e) {
                             }
                         }
-                    }, msg.arg1 > 0, msg.arg2 > 0, SCREEN_SHOT_NORMAL);
+                    }, msg.arg1 > 0, msg.arg2 > 0, SCREEN_SHOT_FRAME);
             }
         }
     };

@@ -84,6 +84,10 @@
             android:process=":screenshot"
             android:exported="false" />
 
+        <service android:name=".screenshot.TakeScreenshotFrameService"
+            android:process=":screenshot"
+            android:exported="false" />
+
         <service android:name=".LoadAverageService"
                 android:exported="true" />
 
