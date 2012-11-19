@@ -342,6 +342,8 @@ public class NavigationBarView extends LinearLayout {
 
         final View navButtons = mCurrentView.findViewById(R.id.nav_buttons);
         final View lowLights = mCurrentView.findViewById(R.id.lights_out);
+        
+        lowLights.setBackgroundColor(0xff000000);
 
         // ok, everyone, stop it right there
         navButtons.animate().cancel();
