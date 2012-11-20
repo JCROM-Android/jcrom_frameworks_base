@@ -88,6 +88,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import com.android.systemui.statusbar.LatestItemView;
 
+import com.android.internal.os.AutoRun;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
@@ -2155,7 +2156,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.packageName = mContext.getPackageName();
 
         makeStatusBarView();
-        mWindowManager.addView(mStatusBarWindow, lp);
+        if (AutoRun.hasStatusBar()) {
+            mWindowManager.addView(mStatusBarWindow, lp);
+        }
     }
 
     void setNotificationIconVisibility(boolean visible, int anim) {

@@ -60,6 +60,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.android.internal.R;
+import com.android.internal.os.AutoRun;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.keyguard.KeyguardViewManager;
 import com.android.internal.policy.impl.keyguard.KeyguardViewMediator;
@@ -1038,6 +1039,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // 600+dp: "phone" UI with modifications for larger screens
             mHasSystemNavBar = false;
             mNavigationBarCanMove = false;
+        } else {
+            String select = SystemProperties.get("persist.sys.ui.select");
+            if( select.equals("2") ) {
+                mHasSystemNavBar = true;
+                mNavigationBarCanMove = false;
+            }
         }
 
         if (!mHasSystemNavBar) {
@@ -1050,6 +1057,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if      (navBarOverride.equals("1")) mHasNavigationBar = false;
                 else if (navBarOverride.equals("0")) mHasNavigationBar = true;
             }
+
+            String forceTablet = AutoRun.getUIType();
+            if ("".equals(forceTablet)) {
+                forceTablet = SystemProperties.get("persist.sys.ui.select");
+            }
+            if (! "".equals(forceTablet)) {
+                if      (forceTablet.equals("2")) mHasNavigationBar = false;
+            }
+
+            if (!AutoRun.hasNavigationBar()) {
+                mHasNavigationBar = false;
+            }
+
         } else {
             mHasNavigationBar = false;
         }
