@@ -37,6 +37,8 @@ import com.android.systemui.statusbar.policy.DoNotDisturbController;
 import com.android.systemui.statusbar.policy.ToggleSlider;
 import com.android.systemui.statusbar.policy.VolumeController;
 
+import com.android.systemui.statusbar.tablet.NotificationPanel;
+
 public class SettingsView extends LinearLayout implements View.OnClickListener {
     static final String TAG = "SettingsView";
 
@@ -46,6 +48,8 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
     DoNotDisturbController mDoNotDisturb;
     View mRotationLockContainer;
     View mRotationLockSeparator;
+
+    NotificationPanel mNotificationPanel = null;
 
     public SettingsView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -83,6 +87,15 @@ public class SettingsView extends LinearLayout implements View.OnClickListener {
         mDoNotDisturb = new DoNotDisturbController(context,
                 (CompoundButton)findViewById(R.id.do_not_disturb_checkbox));
         findViewById(R.id.settings).setOnClickListener(this);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh){
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        if(mNotificationPanel != null){
+            mNotificationPanel.addSettingsViewBackground(getWidth(), getHeight());
+        }
     }
 
     @Override

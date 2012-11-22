@@ -36,6 +36,15 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.RelativeLayout;
 
+import java.io.File;
+import android.os.Environment;
+import android.graphics.drawable.Drawable;
+import android.os.SystemProperties;
+import android.graphics.Canvas;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Rect;
+
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -70,6 +79,9 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     float mContentFrameMissingTranslation;
 
     Choreographer mChoreo = new Choreographer();
+
+    private Drawable svDrawable = null;
+    private boolean hasReadSvDrawable = false;
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -327,6 +339,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
         mSettingsView = infl.inflate(R.layout.system_bar_settings_view, mContentFrame, false);
+        ((SettingsView)mSettingsView).mNotificationPanel = this;
         mSettingsView.setVisibility(View.GONE);
         mContentFrame.addView(mSettingsView);
     }
@@ -447,6 +460,43 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         if (mSettingsButton != null) {
             mSettingsButton.setEnabled(settingsEnabled);
             mSettingsButton.setVisibility(settingsEnabled ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        return Drawable.createFromPath(filePath);
+    }
+
+    public void addSettingsViewBackground(int w, int h) {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            if(svDrawable == null && !hasReadSvDrawable){
+                Drawable d = getDrawableFromFile("notification", "notification_tracking_bg.png");
+                if(null != d){
+                    Bitmap  bmporg = ((BitmapDrawable)d).getBitmap();
+                    Canvas c;
+                    Rect rimg = new Rect(0, 0, bmporg.getWidth(), bmporg.getHeight());
+
+                    Rect r = new Rect(0, 0, w, h);
+
+                    Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    c = new Canvas(bmp);
+                    c.drawBitmap(bmporg, rimg, r, null);
+
+                    svDrawable = new BitmapDrawable(bmp);
+                }else{
+                    hasReadSvDrawable = true;
+                }
+            }
+
+            if(svDrawable != null){
+                mSettingsView.setBackgroundDrawable(svDrawable);
+            }
         }
     }
 }
