@@ -16,10 +16,10 @@
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/TextAppearance.QuickSettings.TileView"
-    android:id="@+id/settings_tileview"
+    android:id="@+id/screen_tileview"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:drawableTop="@drawable/ic_qs_settings"
+    android:drawableTop="@drawable/ic_lock_power_off"
     />

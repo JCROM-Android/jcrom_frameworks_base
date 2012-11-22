@@ -626,6 +626,17 @@ public final class Settings {
     public static final String ACTION_NFCSHARING_SETTINGS =
         "android.settings.NFCSHARING_SETTINGS";
 
+    /**
+     * Activity Action: JCROM settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_JCROM_SETTINGS = 
+        "android.settings.JAPANESE_CUSTOM_ROM_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
