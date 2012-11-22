@@ -56,9 +56,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewPropertyAnimator;
@@ -785,6 +787,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    private View.OnLongClickListener mExpandLongClickListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            toggleExpandPanael();
+            return true;
+        }
+    };
+
     private View.OnClickListener mExpandClickListener = new View.OnClickListener() {
         public void onClick(View v) {
         	if (!mAnimating) {
@@ -841,6 +850,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
         mNavigationBarView.getExpandButton().setOnClickListener(mExpandClickListener);
+        mNavigationBarView.getExpandButton().setOnLongClickListener(mExpandLongClickListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
@@ -2757,5 +2767,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    public void toggleExpandPanael() {
+        if (mExpandedVisible) {
+            if(mFlipSettingsView.getVisibility() != View.VISIBLE) {
+                animateExpandSettingsPanel();
+            } else {
+                animateExpandNotificationsPanel();
+            }
+        }
+    }
 
 }
