@@ -293,6 +293,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     void updateResources() {
         refreshSettingsTile();
+        refreshJcromTile();
         refreshBatteryTile();
         refreshBluetoothTile();
         refreshBrightnessTile();
@@ -324,6 +325,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 	void addJcromTile(QuickSettingsTileView view, RefreshCallback cb) {
         mJcromTile = view;
         mJcromCallback = cb;
+        refreshJcromTile();
+    }
+    void refreshJcromTile() {
         Resources r = mContext.getResources();
         mJcromState.label = r.getString(R.string.quick_settings_jcrom_label);
 		mJcromCallback.refreshView(mJcromTile, mJcromState);
@@ -335,7 +339,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mSettingsCallback = cb;
         refreshSettingsTile();
     }
-    void refreshSettingsTile() {		
+    void refreshSettingsTile() {
 		Resources r = mContext.getResources();
 		mSettingsState.label = r.getString(R.string.quick_settings_settings_label);
 		if (isToggleEnabled(SETTINGS)) {
