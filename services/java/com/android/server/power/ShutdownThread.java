@@ -126,7 +126,10 @@ public final class ShutdownThread extends Thread {
         Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
 
         if (confirm) {
-            final CloseDialogReceiver closer = new CloseDialogReceiver(context);
+//            final CloseDialogReceiver closer = new CloseDialogReceiver(context);
+            final CloseDialogReceiver closer;
+        if (mReboot) {
+            closer = new CloseDialogReceiver(context);
             if (sConfirmDialog != null) {
                 sConfirmDialog.dismiss();
             }
@@ -165,6 +168,23 @@ public final class ShutdownThread extends Thread {
                             return true;
                         }
                     });
+        } else {
+            closer = new CloseDialogReceiver(context);
+            if (sConfirmDialog != null) {
+                sConfirmDialog.dismiss();
+            }
+            sConfirmDialog = new AlertDialog.Builder(context)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(com.android.internal.R.string.power_off)
+                    .setMessage(com.android.internal.R.string.shutdown_confirm)
+                    .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            beginShutdownSequence(context);
+                        }
+                    })
+                    .setNegativeButton(com.android.internal.R.string.no, null)
+                    .create();
+        }
             sConfirmDialog.setOnDismissListener(closer);
             sConfirmDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             sConfirmDialog.show();
