@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -63,6 +64,7 @@ public class StatusBarWindowView extends FrameLayout
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollView(mScrollView);
+        mExpandHelper.setGravity(Gravity.BOTTOM);
     }
 
     @Override
