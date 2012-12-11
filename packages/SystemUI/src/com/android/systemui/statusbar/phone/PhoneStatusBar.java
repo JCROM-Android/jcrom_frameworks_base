@@ -75,6 +75,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.os.Environment;
+import android.os.SystemProperties;
 
 import java.io.File;
 import android.graphics.drawable.Drawable;
@@ -370,8 +372,15 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
-        mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
-                R.layout.super_status_bar, null);
+        String notification = SystemProperties.get("persist.sys.notification");
+        if (notification.equals("true")) {
+            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                    R.layout.super_status_bar, null);
+        }else {
+            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                    R.layout.super_status_bar_top, null);
+        }
+
         mStatusBarWindow.mService = this;
         mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
             @Override
