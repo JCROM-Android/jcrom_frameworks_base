@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextSwitcher;
+import android.os.SystemProperties;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
@@ -64,7 +65,12 @@ public class StatusBarWindowView extends FrameLayout
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollView(mScrollView);
-        mExpandHelper.setGravity(Gravity.BOTTOM);
+
+        String notification = SystemProperties.get("persist.sys.notification");
+        if (notification.equals("true")) {
+            mExpandHelper.setGravity(Gravity.BOTTOM);
+        }
+
     }
 
     @Override
