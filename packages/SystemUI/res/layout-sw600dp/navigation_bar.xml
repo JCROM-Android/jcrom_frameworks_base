@@ -41,7 +41,11 @@
             >
 
             <!-- navigation controls -->
-
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_width="120dp" android:paddingLeft="25dp" android:paddingRight="25dp"
                 android:layout_height="match_parent"
@@ -85,6 +89,11 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_recent"
                 />
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -95,6 +104,11 @@
             android:id="@+id/lights_out"
             android:visibility="gone"
             >
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />            
             <ImageView
                 android:layout_width="120dp" android:paddingLeft="25dp" android:paddingRight="25dp"
                 android:layout_height="match_parent"
@@ -129,6 +143,11 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                />
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 />
         </LinearLayout>
 
