@@ -42,6 +42,12 @@
             android:animateLayoutChanges="true"
             >
 
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
+
             <!-- navigation controls -->
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_width="@dimen/navigation_key_width"
@@ -86,6 +92,12 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_recent"
                 />
+
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -96,12 +108,10 @@
             android:id="@+id/lights_out"
             android:visibility="gone"
             >
-            <ImageView
-                android:layout_width="72dp"
+            <Space 
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_lights_out_dot_small"
-                android:scaleType="center"
-                android:layout_weight="0"
+                android:layout_weight="1"
                 />
             <ImageView
                 android:layout_width="72dp"
@@ -130,6 +140,18 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                />
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small"
+                android:scaleType="center"
+                android:layout_weight="0"
+                />
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 />
         </LinearLayout>
 
@@ -174,6 +196,11 @@
             android:animateLayoutChanges="true"
             >
             
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
             <!-- navigation controls -->
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                 android:layout_height="72dp"
@@ -218,6 +245,11 @@
                 android:contentDescription="@string/accessibility_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                />
         </LinearLayout>
 
         <!-- lights out layout to match exactly -->
@@ -228,12 +260,10 @@
             android:id="@+id/lights_out"
             android:visibility="gone"
             >
-            <ImageView
-                android:layout_height="72dp"
+            <Space 
                 android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_lights_out_dot_small"
-                android:scaleType="center"
-                android:layout_weight="0"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 />
             <ImageView
                 android:layout_height="72dp"
@@ -262,6 +292,18 @@
                 android:src="@drawable/ic_sysbar_lights_out_dot_small"
                 android:scaleType="center"
                 android:layout_weight="0"
+                />
+            <ImageView
+                android:layout_height="72dp"
+                android:layout_width="match_parent"
+                android:src="@drawable/ic_sysbar_lights_out_dot_small"
+                android:scaleType="center"
+                android:layout_weight="0"
+                />
+            <Space 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 />
         </LinearLayout>
 
