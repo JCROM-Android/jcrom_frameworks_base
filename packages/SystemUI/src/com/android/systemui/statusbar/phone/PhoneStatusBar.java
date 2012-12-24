@@ -90,6 +90,8 @@ import android.view.Surface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import com.android.systemui.statusbar.LatestItemView;
 
 import com.android.internal.os.AutoRun;
@@ -2633,8 +2635,52 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void prepareNotificationBackground() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            mNotificationTrackingDrawable = getDrawableFromFile("notification", "notification_tracking_bg.png");
-            mNotificationTrackingLandDrawable = getDrawableFromFile("notification", "notification_tracking_bg_land.png");
+
+            if(mNotificationPanelMarginPx==0){ // for Phone UI
+
+                mNotificationTrackingDrawable = getDrawableFromFile("notification", "notification_tracking_bg.png");
+                mNotificationTrackingLandDrawable = getDrawableFromFile("notification", "notification_tracking_bg_land.png");
+
+            }else{  // for Phone UI(Large)
+
+                mNotificationTrackingDrawable = getLargeNotificationBackground("notification_tracking_bg.png");
+                mNotificationTrackingLandDrawable = getLargeNotificationBackground("notification_tracking_bg_land.png");
+
+            }
+        }
+    }
+
+    public Drawable getLargeNotificationBackground(String filename){
+
+        Drawable d_land = getDrawableFromFile("notification", filename);
+
+        if(d_land != null){
+            Bitmap bmp_org = ((BitmapDrawable)d_land).getBitmap();
+
+            int w_org = bmp_org.getWidth();
+            int h_org = bmp_org.getHeight();
+            Rect r_org = new Rect(0, 0, w_org, h_org);
+
+            int margin = mNotificationPanelMarginPx;
+
+            Resources res = mContext.getResources();
+            float density = res.getDisplayMetrics().density;
+            int w_large = (int) res.getDimension(R.dimen.notification_panel_width);
+            int w_target = w_large - 2*margin;
+
+            int h_target = (int) (h_org*w_target*density/w_org + 0.5f);
+            int h_large =  h_target + (int)((margin+1)*density + 0.5f);
+
+            Rect r_target = new Rect(margin, 0, margin + w_target, h_target);
+
+            Bitmap bmp_large = Bitmap.createBitmap(w_large, h_large, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp_large);
+            c.drawBitmap(bmp_org, r_org, r_target, null);
+
+            return new BitmapDrawable(bmp_large);
+
+        }else{
+            return null;
         }
     }
 
