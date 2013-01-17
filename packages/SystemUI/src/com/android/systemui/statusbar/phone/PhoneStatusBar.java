@@ -296,6 +296,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     Drawable mStatusBarLandDrawable = null;
     Drawable mNotificationTrackingDrawable = null;
     Drawable mNotificationTrackingLandDrawable = null;
+    Drawable mQuickSettingDrawable = null;
+    Drawable mQuickSettingLandDrawable = null;
     LevelListDrawable mlevelListDrawable = null;
     LevelListDrawable mlevelListLandDrawable = null;
 
@@ -2225,6 +2227,18 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         updateCarrierLabelVisibility(false);
+
+        if (requiresRotation()) {
+            if(mQuickSettingLandDrawable != null) {
+                mSettingsPanel.setBackgroundDrawable(mQuickSettingLandDrawable);
+            }else if(mQuickSettingDrawable != null) {
+                mSettingsPanel.setBackgroundDrawable(mQuickSettingDrawable);
+            }
+        }else {
+            if(mQuickSettingDrawable != null){
+                mSettingsPanel.setBackgroundDrawable(mQuickSettingDrawable);
+            }
+        }
     }
 
     // called by makeStatusbar and also by PhoneStatusBarView
@@ -2645,6 +2659,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
                 mNotificationTrackingDrawable = getLargeNotificationBackground("notification_tracking_bg.png");
                 mNotificationTrackingLandDrawable = getLargeNotificationBackground("notification_tracking_bg_land.png");
+
+                mQuickSettingDrawable = getLargeNotificationBackground("quick_setting_bg.png");
+                mQuickSettingLandDrawable = getLargeNotificationBackground("quick_setting_bg_land.png");
 
             }
         }
