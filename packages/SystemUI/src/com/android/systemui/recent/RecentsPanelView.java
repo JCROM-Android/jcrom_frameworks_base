@@ -97,6 +97,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
     private boolean mMyFrame = false;
+    Bitmap mMyFrameBmp = null;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -259,6 +260,16 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
             mMyFrame = true;
+            String MY_FRAME_FILE = "my_frame.png";
+            StringBuilder builder = new StringBuilder();
+            builder.append(Environment.getDataDirectory().toString() + "/theme/frame/");
+            builder.append(File.separator);
+            builder.append(MY_FRAME_FILE);
+            String filePath = builder.toString();
+            Drawable drawable = Drawable.createFromPath(filePath);
+            if( drawable != null ) {
+                mMyFrameBmp = ((BitmapDrawable) drawable).getBitmap();
+            }
         }
         updateValuesFromResources();
 
@@ -489,19 +500,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         if (thumbnail != null) {
 
             if ( true == mMyFrame ) {
-                String MY_FRAME_FILE = "my_frame.png";
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/frame/");
-                builder.append(File.separator);
-                builder.append(MY_FRAME_FILE);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
-                if( null != drawable ) {
-                    Bitmap myframe = ((BitmapDrawable) drawable).getBitmap();
+                if( null != mMyFrameBmp ) {
                     Canvas c = new Canvas( thumbnail );
 
-                    int w0 = myframe.getWidth();
-                    int h0 = myframe.getHeight();
+                    int w0 = mMyFrameBmp.getWidth();
+                    int h0 = mMyFrameBmp.getHeight();
                     int w1 = c.getWidth();
 
                     float rate = 1.0F;
@@ -511,8 +514,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     }
                     Rect src=new Rect(0, 0, w0, h0);
                     Rect dst=new Rect(0, 0, w1, (int)(h0*rate));
-
-                    c.drawBitmap(myframe, src, dst, null );
+                    c.drawBitmap(mMyFrameBmp, src, dst, null );
                 }
             }
             // Should remove the default image in the frame
