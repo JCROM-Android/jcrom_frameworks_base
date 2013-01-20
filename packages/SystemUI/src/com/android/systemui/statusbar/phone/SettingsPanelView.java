@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.os.SystemProperties;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -55,10 +56,15 @@ public class SettingsPanelView extends PanelView {
         mQSContainer = (QuickSettingsContainerView) findViewById(R.id.quick_settings_container);
 
         Resources resources = getContext().getResources();
-        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close_jcrom);
+            mHandleView = findViewById(R.id.handle_jcrom);
+        } else {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+            mHandleView = findViewById(R.id.handle);
+        }
         mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
-        mHandleView = findViewById(R.id.handle);
-
         setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
     

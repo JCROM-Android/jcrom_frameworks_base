@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
+import android.os.SystemProperties;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -50,10 +51,15 @@ public class NotificationPanelView extends PanelView {
         super.onFinishInflate();
 
         Resources resources = getContext().getResources();
-        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close_jcrom);
+            mHandleView = findViewById(R.id.handle_jcrom);
+        } else {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+            mHandleView = findViewById(R.id.handle);
+        }
         mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
-        mHandleView = findViewById(R.id.handle);
-
         setContentDescription(resources.getString(R.string.accessibility_desc_notification_shade));
     }
 

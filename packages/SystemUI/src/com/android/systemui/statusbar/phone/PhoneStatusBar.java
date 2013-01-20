@@ -377,12 +377,23 @@ public class PhoneStatusBar extends BaseStatusBar {
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
         String notification = SystemProperties.get("persist.sys.notification");
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (notification.equals("true")) {
-            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
-                    R.layout.super_status_bar, null);
+            if (forceHobby.equals("true")) {
+                mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                        R.layout.super_status_bar_jcrom, null);
+            }else {
+                mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                        R.layout.super_status_bar, null);
+            }
         }else {
-            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
-                    R.layout.super_status_bar_top, null);
+            if (forceHobby.equals("true")) {
+                mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                        R.layout.super_status_bar_jcrom_top, null);
+            }else {
+                mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                        R.layout.super_status_bar_top, null);
+            }
         }
 
         mStatusBarWindow.mService = this;
@@ -657,7 +668,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         context.registerReceiver(mBroadcastReceiver, filter);
 
-        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
             String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
             String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";

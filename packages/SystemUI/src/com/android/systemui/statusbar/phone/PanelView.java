@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.os.SystemProperties;
 
 import com.android.systemui.R;
 
@@ -246,7 +247,12 @@ public class PanelView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mHandleView = findViewById(R.id.handle);
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mHandleView = findViewById(R.id.handle_jcrom);
+        } else {
+            mHandleView = findViewById(R.id.handle);
+        }
 
         loadDimens();
 
