@@ -2851,10 +2851,14 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void toggleExpandPanael() {
         if (mExpandedVisible) {
-            if(mFlipSettingsView.getVisibility() != View.VISIBLE) {
-                animateExpandSettingsPanel();
-            } else {
-                animateExpandNotificationsPanel();
+            if (mStatusBarView.hasFullWidthNotifications()) { // Phone
+                flipPanels();
+            } else { // Phone(Large)
+                if(mSettingsPanel.getVisibility() != View.VISIBLE) {
+                    animateExpandSettingsPanel();
+                } else {
+                    animateExpandNotificationsPanel();
+                }
             }
         }
     }
