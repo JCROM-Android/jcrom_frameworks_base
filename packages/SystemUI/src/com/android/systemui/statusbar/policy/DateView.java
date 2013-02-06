@@ -25,9 +25,15 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.TextView;
+import android.graphics.Color;
+import android.util.Slog;
+import android.os.Environment;
 
 import com.android.systemui.R;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.Date;
 
 public class DateView extends TextView {
@@ -36,6 +42,12 @@ public class DateView extends TextView {
     private boolean mAttachedToWindow;
     private boolean mWindowVisible;
     private boolean mUpdating;
+
+    public static final String THEME_DIRECTORY = "/theme/notification/";
+    public static final String CONFIGURATION_FILE = "notification.conf";
+    private final String mFilePath;
+    private Properties prop;
+    private String mColor = null;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -51,6 +63,23 @@ public class DateView extends TextView {
 
     public DateView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
+        loadConf(mFilePath);
+    }
+
+    private void loadConf(String filePath) {
+        prop = new Properties();
+        try {
+            prop.load(new FileInputStream(filePath));
+            setConf();
+        } catch (IOException e) {
+            mColor = null;
+            return;
+        }
+    }
+
+    private void setConf() {
+        mColor = prop.getProperty("color.date");
     }
 
     @Override
@@ -88,6 +117,10 @@ public class DateView extends TextView {
 
     protected void updateClock() {
         final String dateFormat = getContext().getString(R.string.abbrev_wday_month_day_no_year);
+        if(null != mColor) {
+            int color = (int)(Long.parseLong(mColor, 16));
+            setTextColor(color);
+        }
         setText(DateFormat.format(dateFormat, new Date()));
     }
 

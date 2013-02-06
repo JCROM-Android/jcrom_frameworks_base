@@ -38,15 +38,10 @@ import android.util.Slog;
 import android.view.View;
 import android.widget.TextView;
 import android.graphics.Color;
-import android.os.Environment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 
 import com.android.internal.R;
 
@@ -54,8 +49,7 @@ import com.android.internal.R;
  * This widget display an analogic clock with two hands for hours and
  * minutes.
  */
-public class Clock extends TextView {
-    private static final String TAG = "StatusBar.Clock";
+public class DefaultClock extends TextView {
     private boolean mAttached;
     private Calendar mCalendar;
     private String mClockFormatString;
@@ -67,39 +61,16 @@ public class Clock extends TextView {
 
     private static final int AM_PM_STYLE = AM_PM_STYLE_GONE;
 
-    public static final String THEME_DIRECTORY = "/theme/notification/";
-    public static final String CONFIGURATION_FILE = "notification.conf";
-    private final String mFilePath;
-    private Properties prop;
-    private String mColor = null;
-
-    public Clock(Context context) {
+    public DefaultClock(Context context) {
         this(context, null);
     }
 
-    public Clock(Context context, AttributeSet attrs) {
+    public DefaultClock(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public Clock(Context context, AttributeSet attrs, int defStyle) {
+    public DefaultClock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
-        loadConf(mFilePath);
-    }
-
-    private void loadConf(String filePath) {
-        prop = new Properties();
-        try {
-            prop.load(new FileInputStream(filePath));
-            setConf();
-        } catch (IOException e) {
-            mColor = null;
-            return;
-        }
-    }
-
-    private void setConf() {
-        mColor = prop.getProperty("color.clock");
     }
 
     @Override
@@ -154,10 +125,6 @@ public class Clock extends TextView {
 
     final void updateClock() {
         mCalendar.setTimeInMillis(System.currentTimeMillis());
-        if(null != mColor) {
-            int color = (int)(Long.parseLong(mColor, 16));
-            setTextColor(color);
-        }
         setText(getSmallTime());
     }
 
