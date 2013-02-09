@@ -81,9 +81,13 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.os.Environment;
 
 import java.util.ArrayList;
-
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.HashMap;
 
 /**
  *
@@ -132,6 +136,28 @@ class QuickSettings {
 	private String LOCATION = "QS_Location";
 	private String RINGER = "QS_Ringer";
 
+    public static final String THEME_DIRECTORY = "/theme/notification/";
+    public static final String CONFIGURATION_FILE = "quicksettings.conf";
+
+    public static final String USER_COLOR = "color.user";
+    public static final String SETTINGS_COLOR = "color.settings";
+    public static final String RINGER_COLOR = "color.ringer";
+    public static final String BRIGHTNESS_COLOR = "color.brightness";
+    public static final String VOLUME_COLOR = "color.volume";
+    public static final String JCROM_COLOR = "color.jcrom";
+    public static final String BATTERY_COLOR = "color.battery";
+    public static final String ROTATION_COLOR = "color.rotation";
+    public static final String AIRPLANE_COLOR = "color.airplane";
+    public static final String WIFI_COLOR = "color.wifi";
+    public static final String RSSI_COLOR = "color.rssi";
+    public static final String BLUETOOTH_COLOR = "color.bluetooth";
+    public static final String LOCATION_COLOR = "color.location";
+    public static final String SCREEN_COLOR = "color.screen";
+
+    private HashMap<String,String> mLabelListColor = new HashMap<String,String>();
+    private String mFilePath;
+    private Properties prop;
+
     // The set of QuickSettingsTiles that have dynamic spans (and need to be updated on
     // configuration change)
     private final ArrayList<QuickSettingsTileView> mDynamicSpannedTiles =
@@ -175,6 +201,22 @@ class QuickSettings {
         profileFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         mContext.registerReceiverAsUser(mProfileReceiver, UserHandle.ALL, profileFilter,
                 null, null);
+
+        mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
+        mLabelListColor.put(USER_COLOR, loadConf(mFilePath, USER_COLOR));
+        mLabelListColor.put(SETTINGS_COLOR, loadConf(mFilePath, SETTINGS_COLOR));
+        mLabelListColor.put(RINGER_COLOR, loadConf(mFilePath, RINGER_COLOR));
+        mLabelListColor.put(BRIGHTNESS_COLOR, loadConf(mFilePath, BRIGHTNESS_COLOR));
+        mLabelListColor.put(VOLUME_COLOR, loadConf(mFilePath, VOLUME_COLOR));
+        mLabelListColor.put(JCROM_COLOR, loadConf(mFilePath, JCROM_COLOR));
+        mLabelListColor.put(BATTERY_COLOR, loadConf(mFilePath, BATTERY_COLOR));
+        mLabelListColor.put(ROTATION_COLOR, loadConf(mFilePath, ROTATION_COLOR));
+        mLabelListColor.put(AIRPLANE_COLOR, loadConf(mFilePath, AIRPLANE_COLOR));
+        mLabelListColor.put(WIFI_COLOR, loadConf(mFilePath, WIFI_COLOR));
+        mLabelListColor.put(RSSI_COLOR, loadConf(mFilePath, RSSI_COLOR));
+        mLabelListColor.put(BLUETOOTH_COLOR, loadConf(mFilePath, BLUETOOTH_COLOR));
+        mLabelListColor.put(LOCATION_COLOR, loadConf(mFilePath, LOCATION_COLOR));
+        mLabelListColor.put(SCREEN_COLOR, loadConf(mFilePath, SCREEN_COLOR));
     }
 
     void setBar(PanelBar bar) {
@@ -338,6 +380,12 @@ class QuickSettings {
 				UserState us = (UserState) state;
 				ImageView iv = (ImageView) view.findViewById(R.id.user_imageview);
 				TextView tv = (TextView) view.findViewById(R.id.user_textview);
+
+                if(null != mLabelListColor.get(USER_COLOR)) {
+                    int color = (int)(Long.parseLong(mLabelListColor.get(USER_COLOR), 16));
+                    tv.setTextColor(color);
+                }
+
 				tv.setText(state.label);
 				iv.setImageDrawable(us.avatar);
 				view.setContentDescription(mContext.getString(
@@ -362,6 +410,12 @@ class QuickSettings {
 				@Override
 				public void refreshView(QuickSettingsTileView view, State state) {
 					TextView tv = (TextView) view.findViewById(R.id.settings_tileview);
+
+                    if(null != mLabelListColor.get(SETTINGS_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(SETTINGS_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
+
 					tv.setText(state.label);
 				}
 			});
@@ -403,6 +457,11 @@ class QuickSettings {
 				public void refreshView(QuickSettingsTileView view, State state) {
 					TextView tv = (TextView) view.findViewById(R.id.ringer_textview);
 					ImageView iv = (ImageView) view.findViewById(R.id.ringer_overlay_image);
+
+                    if(null != mLabelListColor.get(RINGER_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(RINGER_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					
 					AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);				
 					switch (am.getRingerMode()) {
@@ -442,6 +501,10 @@ class QuickSettings {
 				public void refreshView(QuickSettingsTileView view, State state) {
 					TextView tv = (TextView) view.findViewById(R.id.brightness_textview);
 					tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    if(null != mLabelListColor.get(BRIGHTNESS_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(BRIGHTNESS_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText(state.label);
 					dismissBrightnessDialog(mBrightnessDialogShortTimeout);
 				}
@@ -474,6 +537,10 @@ class QuickSettings {
 				@Override
 				public void refreshView(QuickSettingsTileView view, State state) {
 					TextView tv = (TextView) view.findViewById(R.id.volume_tileview);
+                    if(null != mLabelListColor.get(VOLUME_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(VOLUME_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText("Media Volume");
 				}
 			});
@@ -496,6 +563,10 @@ class QuickSettings {
 				@Override
 				public void refreshView(QuickSettingsTileView view, State state) {
 					TextView tv = (TextView) view.findViewById(R.id.jcrom_tileview);
+                    if(null != mLabelListColor.get(JCROM_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(JCROM_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText(state.label);
 				}
 			});
@@ -558,6 +629,10 @@ class QuickSettings {
 					}
 					iv.setImageDrawable(d);
 					iv.setImageLevel(batteryState.batteryLevel);
+                    if(null != mLabelListColor.get(BATTERY_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(BATTERY_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText(t);
 					view.setContentDescription(
 							mContext.getString(R.string.accessibility_quick_settings_battery, t));
@@ -583,6 +658,10 @@ class QuickSettings {
                 public void refreshView(QuickSettingsTileView view, State state) {
                     TextView tv = (TextView) view.findViewById(R.id.rotation_lock_textview);
                     tv.setCompoundDrawablesWithIntrinsicBounds(0, state.iconId, 0, 0);
+                    if(null != mLabelListColor.get(ROTATION_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(ROTATION_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
                     tv.setText(state.label);
                 }
             });
@@ -605,6 +684,10 @@ class QuickSettings {
 									: R.string.accessibility_desc_off);
 					view.setContentDescription(
 						mContext.getString(R.string.accessibility_quick_settings_airplane, airplaneState));
+                    if(null != mLabelListColor.get(AIRPLANE_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(AIRPLANE_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText(state.label);
 				}
 			});
@@ -636,6 +719,10 @@ class QuickSettings {
 					WifiState wifiState = (WifiState) state;
 					TextView tv = (TextView) view.findViewById(R.id.wifi_textview);
 					tv.setCompoundDrawablesWithIntrinsicBounds(0, wifiState.iconId, 0, 0);
+                    if(null != mLabelListColor.get(WIFI_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(WIFI_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText(wifiState.label);
 					view.setContentDescription(mContext.getString(
 							R.string.accessibility_quick_settings_wifi,
@@ -683,6 +770,10 @@ class QuickSettings {
                         iov.setImageResource(rssiState.dataTypeIconId);
                     } else {
                         iov.setImageDrawable(null);
+                    }
+                    if(null != mLabelListColor.get(RSSI_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(RSSI_COLOR), 16));
+                        tv.setTextColor(color);
                     }
                     tv.setText(state.label);
                     view.setContentDescription(mContext.getResources().getString(
@@ -742,6 +833,10 @@ class QuickSettings {
                     view.setContentDescription(mContext.getString(
                             R.string.accessibility_quick_settings_bluetooth,
                             bluetoothState.stateContentDescription));
+                    if(null != mLabelListColor.get(BLUETOOTH_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(BLUETOOTH_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
                     tv.setText(label);
                 }
             });
@@ -778,6 +873,10 @@ class QuickSettings {
 							
 					TextView tv = (TextView) view.findViewById(R.id.location_textview);
 					ImageView iv = (ImageView) view.findViewById(R.id.location_image);
+                    if(null != mLabelListColor.get(LOCATION_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(LOCATION_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					if (locationEnabled) {
 						tv.setText("GPS ON");
 						iv.setImageResource(R.drawable.ic_qs_location_on);
@@ -806,6 +905,10 @@ class QuickSettings {
 				@Override
 				public void refreshView(QuickSettingsTileView view, State state) {
 					TextView tv = (TextView) view.findViewById(R.id.screen_tileview);
+                    if(null != mLabelListColor.get(SCREEN_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(SCREEN_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
 					tv.setText("Screen Off");
 				}
 			});
@@ -1111,4 +1214,15 @@ class QuickSettings {
 
         }
     };
+
+    private String loadConf(String filePath, String propertyName) {
+        prop = new Properties();
+        try {
+            prop.load(new FileInputStream(filePath));
+            return prop.getProperty(propertyName);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
 }
