@@ -45,6 +45,7 @@ public class DateView extends TextView {
 
     public static final String THEME_DIRECTORY = "/theme/notification/";
     public static final String CONFIGURATION_FILE = "notification.conf";
+    public static final String DATE_COLOR = "color.date";
     private final String mFilePath;
     private Properties prop;
     private String mColor = null;
@@ -64,22 +65,18 @@ public class DateView extends TextView {
     public DateView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
-        loadConf(mFilePath);
+        loadConf(mFilePath, DATE_COLOR);
     }
 
-    private void loadConf(String filePath) {
+    private void loadConf(String filePath, String propertyName) {
         prop = new Properties();
         try {
             prop.load(new FileInputStream(filePath));
-            setConf();
+            mColor = prop.getProperty(propertyName);
         } catch (IOException e) {
             mColor = null;
             return;
         }
-    }
-
-    private void setConf() {
-        mColor = prop.getProperty("color.date");
     }
 
     @Override

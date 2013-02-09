@@ -25,12 +25,18 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
 import android.widget.TextView;
+import android.graphics.Color;
+import android.os.Environment;
 
 import com.android.internal.telephony.TelephonyIntents;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 import com.android.internal.R;
 
@@ -39,7 +45,15 @@ import com.android.internal.R;
  * minutes.
  */
 public class CarrierLabel extends TextView {
+    private static final String TAG = "StatusBar.CarrierLabel";
     private boolean mAttached;
+
+    public static final String THEME_DIRECTORY = "/theme/notification/";
+    public static final String CONFIGURATION_FILE = "notification.conf";
+    public static final String CARRIER_COLOR = "color.carrier";
+    private final String mFilePath;
+    private Properties prop;
+    private String mColor = null;
 
     public CarrierLabel(Context context) {
         this(context, null);
@@ -51,6 +65,8 @@ public class CarrierLabel extends TextView {
 
     public CarrierLabel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
+        loadConf(mFilePath, CARRIER_COLOR);
         updateNetworkName(false, null, false, null);
     }
 
@@ -106,9 +122,23 @@ public class CarrierLabel extends TextView {
         } else {
             str = "";
         }
+        if(null != mColor) {
+            int color = (int)(Long.parseLong(mColor, 16));
+            setTextColor(color);
+        }
         setText(str);
     }
 
+    private void loadConf(String filePath, String propertyName) {
+        prop = new Properties();
+        try {
+            prop.load(new FileInputStream(filePath));
+            mColor = prop.getProperty(propertyName);
+        } catch (IOException e) {
+            mColor = null;
+            return;
+        }
+    }
 
 }
 

@@ -69,6 +69,7 @@ public class Clock extends TextView {
 
     public static final String THEME_DIRECTORY = "/theme/notification/";
     public static final String CONFIGURATION_FILE = "notification.conf";
+    public static final String CLOCK_COLOR = "color.clock";
     private final String mFilePath;
     private Properties prop;
     private String mColor = null;
@@ -84,22 +85,18 @@ public class Clock extends TextView {
     public Clock(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
-        loadConf(mFilePath);
+        loadConf(mFilePath, CLOCK_COLOR);
     }
 
-    private void loadConf(String filePath) {
+    private void loadConf(String filePath, String propertyName) {
         prop = new Properties();
         try {
             prop.load(new FileInputStream(filePath));
-            setConf();
+            mColor = prop.getProperty(propertyName);
         } catch (IOException e) {
             mColor = null;
             return;
         }
-    }
-
-    private void setConf() {
-        mColor = prop.getProperty("color.clock");
     }
 
     @Override

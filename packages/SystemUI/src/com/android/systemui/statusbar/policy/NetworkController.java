@@ -46,6 +46,9 @@ import android.util.Slog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IccCardConstants;
@@ -137,6 +140,13 @@ public class NetworkController extends BroadcastReceiver {
 
     private boolean mAirplaneMode = false;
     private boolean mLastAirplaneMode = true;
+
+    public static final String THEME_DIRECTORY = "/theme/notification/";
+    public static final String CONFIGURATION_FILE = "notification.conf";
+    public static final String EMERGENCYLABEL_COLOR = "color.emergency";
+    private String mFilePath;
+    private Properties prop;
+    private String mColor = null;
 
     // our ui
     Context mContext;
@@ -256,6 +266,9 @@ public class NetworkController extends BroadcastReceiver {
 
         // yuck
         mBatteryStats = BatteryStatsService.getService();
+
+        mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
+        loadConf(mFilePath, EMERGENCYLABEL_COLOR);
     }
 
     public boolean hasMobileDataFeature() {
@@ -1353,6 +1366,10 @@ public class NetworkController extends BroadcastReceiver {
             if (!emergencyOnly) {
                 v.setVisibility(View.GONE);
             } else {
+                if(null != mColor) {
+                    int color = (int)(Long.parseLong(mColor, 16));
+                    v.setTextColor(color);
+                }
                 v.setText(mobileLabel); // comes from the telephony stack
                 v.setVisibility(View.VISIBLE);
             }
@@ -1563,4 +1580,16 @@ public class NetworkController extends BroadcastReceiver {
         }
         return d;
     }
+
+    private void loadConf(String filePath, String propertyName) {
+        prop = new Properties();
+        try {
+            prop.load(new FileInputStream(filePath));
+            mColor = prop.getProperty(propertyName);
+        } catch (IOException e) {
+            mColor = null;
+            return;
+        }
+    }
+
 }
