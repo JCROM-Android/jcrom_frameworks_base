@@ -2698,10 +2698,12 @@ public class PhoneStatusBar extends BaseStatusBar {
             int h_org = bmp_org.getHeight();
             Rect r_org = new Rect(0, 0, w_org, h_org);
 
-            int margin = mNotificationPanelMarginPx;
-
             Resources res = mContext.getResources();
             float density = res.getDisplayMetrics().density;
+//            int margin = mNotificationPanelMarginPx;
+            // Quick fix (This works on both N7 and N10)
+            int margin = (int)(16 * density + 0.5f);
+
             int w_large = (int) res.getDimension(R.dimen.notification_panel_width);
             int w_target = w_large - 2*margin;
 
