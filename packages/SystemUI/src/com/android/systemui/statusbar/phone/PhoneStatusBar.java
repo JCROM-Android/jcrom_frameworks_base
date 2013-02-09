@@ -481,6 +481,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
+        if (forceHobby.equals("true")) {
+            setClearButtonImage("ic_notify_clear.png");
+        }
         mClearButton.setOnClickListener(mClearButtonListener);
         mClearButton.setAlpha(0f);
         mClearButton.setVisibility(View.INVISIBLE);
@@ -502,7 +505,11 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (mHasSettingsPanel) {
                 if (mStatusBarView.hasFullWidthNotifications()) {
                     // the settings panel is hiding behind this button
-                    mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+                    if (forceHobby.equals("true")) {
+                        setQuickSettingsImage("ic_notify_quicksettings.png");
+                    } else {
+                        mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+                    }
                     mSettingsButton.setVisibility(View.VISIBLE);
                 } else {
                     // there is a settings panel, but it's on the other side of the (large) screen
@@ -521,6 +528,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mHasFlipSettings) {
             mNotificationButton = (ImageView) mStatusBarWindow.findViewById(R.id.notification_button);
             if (mNotificationButton != null) {
+                if (forceHobby.equals("true")) {
+                    setNotificationButtonImage("ic_notify_open.png");
+                }
                 mNotificationButton.setOnClickListener(mNotificationButtonListener);
             }
         }
@@ -2861,6 +2871,32 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
             }
         }
+    }
+
+    private void setQuickSettingsImage(String filename) {
+        Drawable drawable = loadButtonImage(filename);
+        if (drawable != null) {
+            mSettingsButton.setImageDrawable(drawable);
+        }
+    }
+
+    private void setNotificationButtonImage(String filename) {
+        Drawable drawable = loadButtonImage(filename);
+        if (drawable != null) {
+            mNotificationButton.setImageDrawable(drawable);
+        }
+    }
+
+    private void setClearButtonImage(String filename) {
+        Drawable drawable = loadButtonImage(filename);
+        if (drawable != null) {
+            ((ImageView)mClearButton).setImageDrawable(drawable);
+        }
+    }
+
+    private Drawable loadButtonImage(String filename) {
+        String filepath = Environment.getDataDirectory().toString() + "/theme/notification/" + filename;
+        return Drawable.createFromPath(filepath);
     }
 
 }
