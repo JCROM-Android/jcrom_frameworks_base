@@ -48,7 +48,8 @@ public final class RotationPolicy {
      * settings.
      */
     public static boolean isRotationLockToggleSupported(Context context) {
-        return context.getResources().getConfiguration().smallestScreenWidthDp >= 600;
+        //return context.getResources().getConfiguration().smallestScreenWidthDp >= 600;
+        return true;
     }
 
     /**
