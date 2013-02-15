@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.GestureRecorder;
 public class NotificationPanelView extends PanelView {
 
     Drawable mHandleBar;
-    float mHandleBarHeight;
+    int mHandleBarHeight;
     View mHandleView;
     int mFingers;
     PhoneStatusBar mStatusBar;
@@ -59,7 +59,7 @@ public class NotificationPanelView extends PanelView {
             mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
             mHandleView = findViewById(R.id.handle);
         }
-        mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
+        mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         setContentDescription(resources.getString(R.string.accessibility_desc_notification_shade));
     }
 

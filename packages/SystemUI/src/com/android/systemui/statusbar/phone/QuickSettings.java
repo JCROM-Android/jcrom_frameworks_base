@@ -96,6 +96,8 @@ class QuickSettings {
     private static final String TAG = "QuickSettings";
     public static final boolean SHOW_IME_TILE = false;
 
+    public static final boolean LONG_PRESS_TOGGLES = true;
+
     private Context mContext;
     private PanelBar mBar;
     private QuickSettingsModel mModel;
@@ -105,6 +107,8 @@ class QuickSettings {
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
     private BluetoothState mBluetoothState;
+    private BluetoothAdapter mBluetoothAdapter;
+    private WifiManager mWifiManager;
 
     private BrightnessController mBrightnessController;
     private BluetoothController mBluetoothController;
@@ -178,6 +182,9 @@ class QuickSettings {
         mModel = new QuickSettingsModel(context);
         mWifiDisplayStatus = new WifiDisplayStatus();
         mBluetoothState = new QuickSettingsModel.BluetoothState();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+
         mHandler = new Handler();
 
         Resources r = mContext.getResources();
@@ -361,8 +368,7 @@ class QuickSettings {
 						(UserManager) mContext.getSystemService(Context.USER_SERVICE);
 				if (um.getUsers(true).size() > 1) {
 					try {
-						WindowManagerGlobal.getWindowManagerService().lockNow(
-								LockPatternUtils.USER_SWITCH_LOCK_OPTIONS);
+						WindowManagerGlobal.getWindowManagerService().lockNow(null);
 					} catch (RemoteException e) {
 						Log.e(TAG, "Couldn't show user switcher", e);
 					}
@@ -696,7 +702,7 @@ class QuickSettings {
 		
         // Wi-fi
 		if (isToggleEnabled(WIFI)) {
-			QuickSettingsTileView wifiTile = (QuickSettingsTileView)
+            final QuickSettingsTileView wifiTile = (QuickSettingsTileView)
 					inflater.inflate(R.layout.quick_settings_tile, parent, false);
 			wifiTile.setContent(R.layout.quick_settings_tile_wifi, inflater);
 			wifiTile.setOnClickListener(new View.OnClickListener() {
@@ -713,6 +719,29 @@ class QuickSettings {
 					return true;
 				}
 			});
+            if (LONG_PRESS_TOGGLES) {
+                wifiTile.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        final boolean enable =
+                                (mWifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED);
+                        new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... args) {
+                                // Disable tethering if enabling Wifi
+                                final int wifiApState = mWifiManager.getWifiApState();
+                                if (enable && ((wifiApState == WifiManager.WIFI_AP_STATE_ENABLING) ||
+                                               (wifiApState == WifiManager.WIFI_AP_STATE_ENABLED))) {
+                                    mWifiManager.setWifiApEnabled(null, false);
+                                }
+                                mWifiManager.setWifiEnabled(enable);
+                                return null;
+                            }
+                        }.execute();
+                        wifiTile.setPressed(false);
+                        return true;
+                    }} );
+            }
 			mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
 				@Override
 				public void refreshView(QuickSettingsTileView view, State state) {
@@ -733,7 +762,7 @@ class QuickSettings {
 			parent.addView(wifiTile);
 		}
 
-        if (mModel.deviceSupportsTelephony() && isToggleEnabled(DATA)) {
+        if (mModel.deviceHasMobileData() && isToggleEnabled(DATA)) {
             // RSSI
             QuickSettingsTileView rssiTile = (QuickSettingsTileView)
                     inflater.inflate(R.layout.quick_settings_tile, parent, false);
@@ -787,7 +816,7 @@ class QuickSettings {
 
         // Bluetooth
         if (mModel.deviceSupportsBluetooth() && isToggleEnabled(BT)) {
-            QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
+            final QuickSettingsTileView bluetoothTile = (QuickSettingsTileView)
                     inflater.inflate(R.layout.quick_settings_tile, parent, false);
             bluetoothTile.setContent(R.layout.quick_settings_tile_bluetooth, inflater);
             bluetoothTile.setOnClickListener(new View.OnClickListener() {
@@ -808,6 +837,19 @@ class QuickSettings {
 					return true;
                 }
             });
+            if (LONG_PRESS_TOGGLES) {
+                bluetoothTile.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if (mBluetoothAdapter.isEnabled()) {
+                            mBluetoothAdapter.disable();
+                        } else {
+                            mBluetoothAdapter.enable();
+                        }
+                        bluetoothTile.setPressed(false);
+                        return true;
+                    }});
+            }
             mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {

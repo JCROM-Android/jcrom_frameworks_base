@@ -42,7 +42,7 @@ public class SettingsPanelView extends PanelView {
     private QuickSettingsContainerView mQSContainer;
 
     Drawable mHandleBar;
-    float mHandleBarHeight;
+    int mHandleBarHeight;
     View mHandleView;
 
     public SettingsPanelView(Context context, AttributeSet attrs) {
@@ -64,7 +64,7 @@ public class SettingsPanelView extends PanelView {
             mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
             mHandleView = findViewById(R.id.handle);
         }
-        mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
+        mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
     
