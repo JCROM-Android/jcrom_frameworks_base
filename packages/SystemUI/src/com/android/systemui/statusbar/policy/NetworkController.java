@@ -62,6 +62,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class NetworkController extends BroadcastReceiver {
     // debug
@@ -140,6 +141,9 @@ public class NetworkController extends BroadcastReceiver {
 
     private boolean mAirplaneMode = false;
     private boolean mLastAirplaneMode = true;
+
+    private Locale mLocale = null;
+    private Locale mLastLocale = null;
 
     public static final String THEME_DIRECTORY = "/theme/notification/";
     public static final String CONFIGURATION_FILE = "notification.conf";
@@ -267,12 +271,18 @@ public class NetworkController extends BroadcastReceiver {
         // yuck
         mBatteryStats = BatteryStatsService.getService();
 
+        mLastLocale = mContext.getResources().getConfiguration().locale;
+
         mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
         loadConf(mFilePath, EMERGENCYLABEL_COLOR);
     }
 
     public boolean hasMobileDataFeature() {
         return mHasMobileDataFeature;
+    }
+
+    public boolean hasVoiceCallingFeature() {
+        return mPhone.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE;
     }
 
     public boolean isEmergencyOnly() {
@@ -416,8 +426,10 @@ public class NetworkController extends BroadcastReceiver {
             updateConnectivity(intent);
             refreshViews();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+            refreshLocale();
             refreshViews();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+            refreshLocale();
             updateAirplaneMode();
             refreshViews();
         } else if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION) ||
@@ -537,6 +549,10 @@ public class NetworkController extends BroadcastReceiver {
     private void updateAirplaneMode() {
         mAirplaneMode = (Settings.Global.getInt(mContext.getContentResolver(),
             Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
+    }
+
+    private void refreshLocale() {
+        mLocale = mContext.getResources().getConfiguration().locale;
     }
 
     private final void updateTelephonySignalStrength() {
@@ -680,11 +696,20 @@ public class NetworkController extends BroadcastReceiver {
                             R.string.accessibility_data_connection_3g);
                     break;
                 case TelephonyManager.NETWORK_TYPE_LTE:
-                    mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
-                    mDataTypeIconId = R.drawable.stat_sys_data_connected_4g;
-                    mQSDataTypeIconId = R.drawable.ic_qs_signal_4g;
-                    mContentDescriptionDataType = mContext.getString(
-                            R.string.accessibility_data_connection_4g);
+                    boolean show4GforLTE = mContext.getResources().getBoolean(R.bool.config_show4GForLTE);
+                    if (show4GforLTE) {
+                        mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
+                        mDataTypeIconId = R.drawable.stat_sys_data_connected_4g;
+                        mQSDataTypeIconId = R.drawable.ic_qs_signal_4g;
+                        mContentDescriptionDataType = mContext.getString(
+                                R.string.accessibility_data_connection_4g);
+                    } else {
+                        mDataIconList = TelephonyIcons.DATA_LTE[mInetCondition];
+                        mDataTypeIconId = R.drawable.stat_sys_data_connected_lte;
+                        mQSDataTypeIconId = R.drawable.ic_qs_signal_lte;
+                        mContentDescriptionDataType = mContext.getString(
+                                R.string.accessibility_data_connection_lte);
+                    }
                     break;
                 default:
                     if (!mShowAtLeastThreeGees) {
@@ -1206,7 +1231,8 @@ public class NetworkController extends BroadcastReceiver {
          || mLastWifiIconId                 != mWifiIconId
          || mLastWimaxIconId                != mWimaxIconId
          || mLastDataTypeIconId             != mDataTypeIconId
-         || mLastAirplaneMode               != mAirplaneMode)
+         || mLastAirplaneMode               != mAirplaneMode
+         || mLastLocale                     != mLocale)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
@@ -1219,6 +1245,10 @@ public class NetworkController extends BroadcastReceiver {
 
         if (mLastAirplaneMode != mAirplaneMode) {
             mLastAirplaneMode = mAirplaneMode;
+        }
+
+        if (mLastLocale != mLocale) {
+            mLastLocale = mLocale;
         }
 
         // the phone icon on phones
@@ -1382,6 +1412,8 @@ public class NetworkController extends BroadcastReceiver {
                 mConnected?"CONNECTED":"DISCONNECTED",
                 mConnectedNetworkType, mConnectedNetworkTypeName));
         pw.println("  - telephony ------");
+        pw.print("  hasVoiceCallingFeature()=");
+        pw.println(hasVoiceCallingFeature());
         pw.print("  hasService()=");
         pw.println(hasService());
         pw.print("  mHspaDataDistinguishable=");

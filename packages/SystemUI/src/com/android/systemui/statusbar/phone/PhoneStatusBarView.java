@@ -18,19 +18,25 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
+import android.content.res.Configuration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = PhoneStatusBar.DEBUG;
+    private static final boolean DEBUG_GESTURES = true;
 
     PhoneStatusBar mBar;
     int mScrimColor;
@@ -42,6 +48,13 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
+    
+    private boolean mShowSettingsPanel = false;
+    private boolean mAutoDefault = false;
+    private boolean mEdgeTrigger = false;
+    
+    private final String AUTO_DEFAULT = "QSM_AUTO_DEFAULT";
+    private final String EDGE_TRIGGER = "QSM_EDGE_TRIGGER";
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -55,6 +68,9 @@ public class PhoneStatusBarView extends PanelBar {
             mSettingsPanelDragzoneFrac = 0f;
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
+        
+        mAutoDefault = Settings.System.getInt(mContext.getContentResolver(), AUTO_DEFAULT, 1) == 1;
+        mEdgeTrigger = Settings.System.getInt(mContext.getContentResolver(), EDGE_TRIGGER, 1) == 1;
     }
 
     public void setBar(PhoneStatusBar bar) {
@@ -113,14 +129,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public PanelView selectPanelForTouch(MotionEvent touch) {
         final float x = touch.getX();
-
-        if (mFullWidthNotifications) {
-            // No double swiping. If either panel is open, nothing else can be pulled down.
-            return ((mSettingsPanel == null ? 0 : mSettingsPanel.getExpandedHeight()) 
-                        + mNotificationPanel.getExpandedHeight() > 0) 
-                    ? null 
-                    : mNotificationPanel;
-        }
+        final boolean isLayoutRtl = isLayoutRtl();
 
         // We split the status bar into thirds: the left 2/3 are for notifications, and the
         // right 1/3 for quick settings. If you pull the status bar down a second time you'll
@@ -137,7 +146,24 @@ public class PhoneStatusBarView extends PanelBar {
 
         if (region < mSettingsPanelDragzoneMin) region = mSettingsPanelDragzoneMin;
 
-        return (w - x < region) ? mSettingsPanel : mNotificationPanel;
+        int screenConfig = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        if (screenConfig == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+            region = w * 0.1f;
+        }
+
+        mShowSettingsPanel = w - x < region;
+        final boolean showSettings = isLayoutRtl ? (x < region) : (w - region < x);
+
+        if (mFullWidthNotifications) {
+            // No double swiping. If either panel is open, nothing else can be
+            // pulled down.
+            return ((mSettingsPanel == null ? 0 : mSettingsPanel.getExpandedHeight())
+                    + mNotificationPanel.getExpandedHeight() > 0)
+                    ? null
+                    : mNotificationPanel;
+        }
+
+        return showSettings ? mSettingsPanel : mNotificationPanel;
     }
 
     @Override
@@ -156,6 +182,10 @@ public class PhoneStatusBarView extends PanelBar {
             Slog.v(TAG, "start opening: " + panel + " shouldfade=" + mShouldFade);
         }
         mFadingPanel = panel;
+        
+        if (mFullWidthNotifications && ((mShowSettingsPanel && mEdgeTrigger) || (mBar.mNotificationIcons.getChildCount() < 1 && mAutoDefault))) {
+            mBar.switchToSettings();
+        }
     }
 
     @Override
@@ -180,7 +210,17 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return mBar.interceptTouchEvent(event) || super.onTouchEvent(event);
+        boolean barConsumedEvent = mBar.interceptTouchEvent(event);
+
+        if (DEBUG_GESTURES) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
+                        event.getActionMasked(), (int) event.getX(), (int) event.getY(),
+                        barConsumedEvent ? 1 : 0);
+            }
+        }
+
+        return barConsumedEvent || super.onTouchEvent(event);
     }
 
     @Override

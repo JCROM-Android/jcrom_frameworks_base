@@ -23,11 +23,15 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.os.SystemProperties;
 
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -37,6 +41,7 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 
 public class SettingsPanelView extends PanelView {
+    public static final boolean DEBUG_GESTURES = true;
 
     private QuickSettings mQS;
     private QuickSettingsContainerView mQSContainer;
@@ -65,9 +70,8 @@ public class SettingsPanelView extends PanelView {
             mHandleView = findViewById(R.id.handle);
         }
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
-        setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
-    
+
     public void setQuickSettings(QuickSettings qs) {
         mQS = qs;
     }
@@ -122,6 +126,17 @@ public class SettingsPanelView extends PanelView {
         }
     }
 
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            event.getText()
+                    .add(getContext().getString(R.string.accessibility_desc_quick_settings));
+            return true;
+        }
+
+        return super.dispatchPopulateAccessibilityEvent(event);
+    }
+
     // We draw the handle ourselves so that it's always glued to the bottom of the window.
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -141,5 +156,16 @@ public class SettingsPanelView extends PanelView {
         mHandleBar.setState(mHandleView.getDrawableState());
         mHandleBar.draw(canvas);
         canvas.translate(0, -off);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (DEBUG_GESTURES) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                EventLog.writeEvent(EventLogTags.SYSUI_QUICKPANEL_TOUCH,
+                       event.getActionMasked(), (int) event.getX(), (int) event.getY());
+            }
+        }
+        return super.onTouchEvent(event);
     }
 }

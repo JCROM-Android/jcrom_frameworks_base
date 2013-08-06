@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextSwitcher;
@@ -71,6 +72,12 @@ public class StatusBarWindowView extends FrameLayout
             mExpandHelper.setGravity(Gravity.BOTTOM);
         }
 
+        // We really need to be able to animate while window animations are going on
+        // so that activities may be started asynchronously from panel animations
+        final ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
+        }
     }
 
     @Override

@@ -81,7 +81,9 @@ public class NavigationBarView extends LinearLayout {
     int mNavigationIconHints = 0;
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
-    
+    private Drawable mRecentIcon;
+    private Drawable mRecentLandIcon;
+
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
 
@@ -198,10 +200,28 @@ public class NavigationBarView extends LinearLayout {
         mShowMenu = false;
         mDelegateHelper = new DelegateViewHelper(this);
 
+        getIcons(res);
+    }
+
+    private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+        mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
+        mRecentLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_land);
+    }
+
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        getIcons(mContext.getResources());
+
+        super.setLayoutDirection(layoutDirection);
+
+		String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+		if (forceHobby.equals("true")) {
+    		setButtonTheme();
+		}
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -253,6 +273,8 @@ public class NavigationBarView extends LinearLayout {
             (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
                 ? (mVertical ? mBackAltLandIcon : mBackAltIcon)
                 : (mVertical ? mBackLandIcon : mBackIcon));
+
+        ((ImageView)getRecentsButton()).setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
 
         setDisabledFlags(mDisabledFlags, true);
     }
@@ -390,6 +412,35 @@ public class NavigationBarView extends LinearLayout {
         setLowProfile(false);
     }
 
+
+    public void setButtonTheme() {
+        Drawable drawable;
+        drawable = loadNaviKeyImage("ic_sysbar_back.png");
+        if (drawable != null) {
+            mBackIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_land.png");
+        if (drawable != null) {
+            mBackLandIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime.png");
+        if (drawable != null) {
+            mBackAltIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png");
+        if (drawable != null) {
+            mBackAltLandIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_recent.png");
+        if (drawable != null) {
+            mRecentIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_recent_land.png");
+        if (drawable != null) {
+            mRecentLandIcon = drawable;
+        }
+    }
+
     @Override
     public void onFinishInflate() {
         mRotatedViews[Surface.ROTATION_0] = 
@@ -436,11 +487,11 @@ public class NavigationBarView extends LinearLayout {
                 }
             }
 
-            setupButtons(R.id.recent_apps, "ic_sysbar_recent.png", "ic_sysbar_recent_land.png");
+//          setupButtons(R.id.recent_apps, "ic_sysbar_recent.png", "ic_sysbar_recent_land.png");
             setupButtons(R.id.mymenu,      "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png");
             setupButtons(R.id.home,        "ic_sysbar_home.png",   "ic_sysbar_home_land.png");
             setupButtons(R.id.expand,      "ic_sysbar_expand.png", "ic_sysbar_expand_land.png");
-
+/*
             Drawable drawable;
             drawable = loadNaviKeyImage("ic_sysbar_back.png");
             if (drawable != null) {
@@ -458,6 +509,8 @@ public class NavigationBarView extends LinearLayout {
             if (drawable != null) {
                 mBackAltLandIcon = drawable;
             }
+*/
+            setButtonTheme();
 
         }else{
                FrameLayout f_port = (FrameLayout) mRotatedViews[Surface.ROTATION_0];

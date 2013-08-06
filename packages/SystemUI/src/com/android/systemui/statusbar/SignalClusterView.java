@@ -144,15 +144,43 @@ public class SignalClusterView
         return super.dispatchPopulateAccessibilityEvent(event);
     }
 
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        if (mWifi != null) {
+            mWifi.setImageDrawable(null);
+        }
+        if (mWifiActivity != null) {
+            mWifiActivity.setImageDrawable(null);
+        }
+
+        if (mMobile != null) {
+            mMobile.setImageDrawable(null);
+        }
+        if (mMobileActivity != null) {
+            mMobileActivity.setImageDrawable(null);
+        }
+        if (mMobileType != null) {
+            mMobileType.setImageDrawable(null);
+        }
+
+        if(mAirplane != null) {
+            mAirplane.setImageDrawable(null);
+        }
+
+        apply();
+    }
+
     // Run after each indicator change.
     private void apply() {
         if (mWifiGroup == null) return;
 
         if (mWifiVisible) {
-            mWifiGroup.setVisibility(View.VISIBLE);
             mWifi.setImageDrawable(getCustomImage(mWifiStrengthId));
             mWifiActivity.setImageDrawable(getCustomImage(mWifiActivityId));
             mWifiGroup.setContentDescription(mWifiDescription);
+            mWifiGroup.setVisibility(View.VISIBLE);
         } else {
             mWifiGroup.setVisibility(View.GONE);
         }
@@ -163,18 +191,18 @@ public class SignalClusterView
                     mWifiStrengthId, mWifiActivityId));
 
         if (mMobileVisible && !mIsAirplaneMode) {
-            mMobileGroup.setVisibility(View.VISIBLE);
             mMobile.setImageDrawable(getCustomImage(mMobileStrengthId));
             mMobileActivity.setImageDrawable(getCustomImage(mMobileActivityId));
             mMobileType.setImageDrawable(getCustomImage(mMobileTypeId));
             mMobileGroup.setContentDescription(mMobileTypeDescription + " " + mMobileDescription);
+            mMobileGroup.setVisibility(View.VISIBLE);
         } else {
             mMobileGroup.setVisibility(View.GONE);
         }
 
         if (mIsAirplaneMode) {
-            mAirplane.setVisibility(View.VISIBLE);
             mAirplane.setImageResource(mAirplaneIconId);
+            mAirplane.setVisibility(View.VISIBLE);
         } else {
             mAirplane.setVisibility(View.GONE);
         }
