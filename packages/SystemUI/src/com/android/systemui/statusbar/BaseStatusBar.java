@@ -83,6 +83,8 @@ import com.android.internal.os.AutoRun;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import com.android.systemui.FullScreenManager;
+
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
     public static final String TAG = "StatusBar";
@@ -142,6 +144,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract void refreshLayout(int layoutDirection);
 
     protected Display mDisplay;
+
+    public FullScreenManager mFullScreenManager;
 
     private boolean mDeviceProvisioned = false;
 
@@ -228,6 +232,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             // If the system process isn't there we're doomed anyway.
         }
 
+        mFullScreenManager = new FullScreenManager(mContext);
         createAndAddWindows();
 
         disable(switches[0]);

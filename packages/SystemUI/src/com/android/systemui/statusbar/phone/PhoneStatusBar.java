@@ -712,6 +712,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
+        mFullScreenManager.setStatusbar(mStatusBarView);
+
         return mStatusBarView;
     }
 
@@ -893,6 +895,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         prepareNavigationBarView();
 
         mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
+
+        mNavigationBarView.setFullScreenManager(mFullScreenManager);
+        mFullScreenManager.setNavbar(mNavigationBarView);
+        mFullScreenManager.update();
     }
 
     private void repositionNavigationBar() {
@@ -1432,6 +1438,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 haltTicker();
             }
         }
+
+        mFullScreenManager.update();
     }
 
     @Override
@@ -2045,6 +2053,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
+        mFullScreenManager.update();
         if (DEBUG) {
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }

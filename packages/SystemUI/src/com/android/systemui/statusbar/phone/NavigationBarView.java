@@ -56,6 +56,8 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 
+import com.android.systemui.FullScreenManager;
+
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
@@ -86,6 +88,8 @@ public class NavigationBarView extends LinearLayout {
 
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
+
+    private FullScreenManager mFullScreenManager;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -201,6 +205,10 @@ public class NavigationBarView extends LinearLayout {
         mDelegateHelper = new DelegateViewHelper(this);
 
         getIcons(res);
+    }
+
+    public void setFullScreenManager(FullScreenManager fsm) {
+        mFullScreenManager = fsm;
     }
 
     private void getIcons(Resources res) {
@@ -517,6 +525,10 @@ public class NavigationBarView extends LinearLayout {
                f_port.setBackgroundColor(0xff000000);
                FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
                f_land.setBackgroundColor(0xff000000);
+        }
+
+        if(mFullScreenManager != null) {
+            mFullScreenManager.update();
         }
     }
 
