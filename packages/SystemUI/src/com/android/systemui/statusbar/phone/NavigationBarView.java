@@ -449,6 +449,33 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
+    private Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
+    }
+
     @Override
     public void onFinishInflate() {
         mRotatedViews[Surface.ROTATION_0] = 
@@ -465,14 +492,8 @@ public class NavigationBarView extends LinearLayout {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
             {//port
-                String IMAGE_FILENAME = "navibar_background_port.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_port");
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
@@ -480,14 +501,8 @@ public class NavigationBarView extends LinearLayout {
                 }
             }
             {//land
-                String IMAGE_FILENAME = "navibar_background_land.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_land");
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{

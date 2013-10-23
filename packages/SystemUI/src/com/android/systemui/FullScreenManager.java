@@ -342,17 +342,17 @@ public class FullScreenManager {
     }
 
     public void prepareStatusBarBackground() {
-        mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background.png");
-        mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land.png");
-        mFullStatusBarDrawable = getDrawableFromFile("wallpaper", "full_status_bar_background" + getFullWallpaperString() + ".png");
-        mFullStatusBarLandDrawable = getDrawableFromFile("wallpaper", "full_status_bar_background" + getFullWallpaperString() + "_land.png");
+        mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background");
+        mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land");
+        mFullStatusBarDrawable = getDrawableFromFile("wallpaper", "full_status_bar_background" + getFullWallpaperString());
+        mFullStatusBarLandDrawable = getDrawableFromFile("wallpaper", "full_status_bar_background" + getFullWallpaperString() + "_land");
     }
 
     public void prepareNaviBarBackground() {
-        mNaviBarDrawable = getDrawableFromFile("navibar", "navibar_background_port.png");
-        mNaviBarLandDrawable = getDrawableFromFile("navibar", "navibar_background_land.png");
-        mFullNaviBarDrawable = getDrawableFromFile("wallpaper", "full_navibar_background" + getFullWallpaperString() + "_port.png");
-        mFullNaviBarLandDrawable = getDrawableFromFile("wallpaper", "full_navibar_background" + getFullWallpaperString() + "_land.png");
+        mNaviBarDrawable = getDrawableFromFile("navibar", "navibar_background_port");
+        mNaviBarLandDrawable = getDrawableFromFile("navibar", "navibar_background_land");
+        mFullNaviBarDrawable = getDrawableFromFile("wallpaper", "full_navibar_background" + getFullWallpaperString() + "_port");
+        mFullNaviBarLandDrawable = getDrawableFromFile("wallpaper", "full_navibar_background" + getFullWallpaperString() + "_land");
     }
 
     public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
@@ -361,7 +361,25 @@ public class FullScreenManager {
         builder.append(File.separator);
         builder.append(MY_FILE_NAME);
         String filePath = builder.toString();
-        return Drawable.createFromPath(filePath);
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
     }
 
     private boolean homeCheck() {

@@ -636,12 +636,11 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
+            String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
             String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
             String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
 
             StringBuilder builder = new StringBuilder();
-            //builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/notification/");
             builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
             builder.append(File.separator);
             builder.append(MY_NOTIFICATION_FORMAT);
@@ -652,8 +651,10 @@ public class TabletStatusBar extends BaseStatusBar implements
                 String pathPressed = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
                 String pathNormal = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
 
-                Drawable drawablePressed = Drawable.createFromPath(pathPressed);
-                Drawable drawableNormal = Drawable.createFromPath(pathNormal);
+                String extension = checkThemeFile(pathPressed);
+                Drawable drawablePressed = Drawable.createFromPath(pathPressed + extension);
+                extension = checkThemeFile(pathNormal);
+                Drawable drawableNormal = Drawable.createFromPath(pathNormal + extension);
                 if ((null == drawablePressed) || (null == drawableNormal)) {
                     break;
                 } else {
@@ -1619,14 +1620,32 @@ public class TabletStatusBar extends BaseStatusBar implements
         builder.append(File.separator);
         builder.append(MY_FILE_NAME);
         String filePath = builder.toString();
-        return Drawable.createFromPath(filePath);
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
     }
 
     public void addNotificationPanelBackground() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            Drawable dNormal = getDrawableFromFile("notification", "notification_panel_tablet_normal.png");
-            Drawable dPressed = getDrawableFromFile("notification", "notification_panel_tablet_pressed.png");
+            Drawable dNormal = getDrawableFromFile("notification", "notification_panel_tablet_normal");
+            Drawable dPressed = getDrawableFromFile("notification", "notification_panel_tablet_pressed");
 
             if(null != dNormal && null != dPressed){
                 NotificationPanelTitle t = (NotificationPanelTitle) mNotificationPanel.findViewById(R.id.title_area);
@@ -1642,8 +1661,8 @@ public class TabletStatusBar extends BaseStatusBar implements
     public void prepareSystemBarBackground() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            mSystemBarDrawable = getDrawableFromFile("navibar", "navibar_background_port.png");
-            mSystemBarLandDrawable = getDrawableFromFile("navibar", "navibar_background_land.png");
+            mSystemBarDrawable = getDrawableFromFile("navibar", "navibar_background_port");
+            mSystemBarLandDrawable = getDrawableFromFile("navibar", "navibar_background_land");
         }
     }
 
@@ -1673,13 +1692,14 @@ public class TabletStatusBar extends BaseStatusBar implements
         String filePathFormat = builder.toString();
 
         String filePath = String.format(filePathFormat, i, suffix);
+        String extension = checkThemeFile(filePath);
 
         return Drawable.createFromPath(filePath);
     }
 
     private void prepareLevelListDrawable() {
 
-        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
+        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
         String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
         String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
 
