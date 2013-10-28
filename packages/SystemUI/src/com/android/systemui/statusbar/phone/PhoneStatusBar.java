@@ -679,12 +679,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         context.registerReceiver(mBroadcastReceiver, filter);
 
         if (forceHobby.equals("true")) {
-            String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
+            String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
             String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
             String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
 
             StringBuilder builder = new StringBuilder();
-            //builder.append(Environment.getExternalStorageDirectory().toString() + "/mytheme/" + SystemProperties.get("persist.sys.theme") + "/notification/");
             builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
             builder.append(File.separator);
             builder.append(MY_NOTIFICATION_FORMAT);
@@ -695,8 +694,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                 String pathPressed = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
                 String pathNormal = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
 
-                Drawable drawablePressed = Drawable.createFromPath(pathPressed);
-                Drawable drawableNormal = Drawable.createFromPath(pathNormal);
+                String extension = checkThemeFile(pathPressed);
+                Drawable drawablePressed = Drawable.createFromPath(pathPressed + extension);
+                extension = checkThemeFile(pathNormal);
+                Drawable drawableNormal = Drawable.createFromPath(pathNormal + extension);
                 if ((null == drawablePressed) || (null == drawableNormal)) {
                     break;
                 } else {
@@ -714,6 +715,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
+
+        mFullScreenManager.setStatusbar(mStatusBarView);
 
         return mStatusBarView;
     }
@@ -897,6 +900,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         prepareNavigationBarView();
 
         mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
+
+        mNavigationBarView.setFullScreenManager(mFullScreenManager);
+        mFullScreenManager.setNavbar(mNavigationBarView);
+        mFullScreenManager.update();
     }
 
     private void repositionNavigationBar() {
@@ -1394,6 +1401,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 haltTicker();
             }
         }
+
+        mFullScreenManager.update();
     }
 
     @Override
@@ -2003,6 +2012,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     public void topAppWindowChanged(boolean showMenu) {
+        mFullScreenManager.update();
         if (DEBUG) {
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
@@ -2640,14 +2650,32 @@ public class PhoneStatusBar extends BaseStatusBar {
         builder.append(File.separator);
         builder.append(MY_FILE_NAME);
         String filePath = builder.toString();
-        return Drawable.createFromPath(filePath);
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
     }
 
     public void prepareStatusBarBackground() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background.png");
-            mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land.png");
+            mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background");
+            mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land");
         }
     }
 
@@ -2681,16 +2709,16 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             if(mNotificationPanelMarginPx==0){ // for Phone UI
 
-                mNotificationTrackingDrawable = getDrawableFromFile("notification", "notification_tracking_bg.png");
-                mNotificationTrackingLandDrawable = getDrawableFromFile("notification", "notification_tracking_bg_land.png");
+                mNotificationTrackingDrawable = getDrawableFromFile("notification", "notification_tracking_bg");
+                mNotificationTrackingLandDrawable = getDrawableFromFile("notification", "notification_tracking_bg_land");
 
             }else{  // for Phone UI(Large)
 
-                mNotificationTrackingDrawable = getLargeNotificationBackground("notification_tracking_bg.png");
-                mNotificationTrackingLandDrawable = getLargeNotificationBackground("notification_tracking_bg_land.png");
+                mNotificationTrackingDrawable = getLargeNotificationBackground("notification_tracking_bg");
+                mNotificationTrackingLandDrawable = getLargeNotificationBackground("notification_tracking_bg_land");
 
-                mQuickSettingDrawable = getLargeNotificationBackground("quick_setting_bg.png");
-                mQuickSettingLandDrawable = getLargeNotificationBackground("quick_setting_bg_land.png");
+                mQuickSettingDrawable = getLargeNotificationBackground("quick_setting_bg");
+                mQuickSettingLandDrawable = getLargeNotificationBackground("quick_setting_bg_land");
 
             }
         }
@@ -2759,14 +2787,15 @@ public class PhoneStatusBar extends BaseStatusBar {
         String filePathFormat = builder.toString();
 
         String filePath = String.format(filePathFormat, i, suffix);
+        String extension = checkThemeFile(filePath);
 
-        return Drawable.createFromPath(filePath);
+        return Drawable.createFromPath(filePath + extension);
     }
 
     private void prepareLevelListDrawable() {
 
-        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s.png";
-        String MY_NOTIFICATION_LAND_FORMAT = "notification_item_background_land_%02d_%s.png";
+        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
+        String MY_NOTIFICATION_LAND_FORMAT = "notification_item_background_land_%02d_%s";
         String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
         String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
 

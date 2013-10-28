@@ -227,6 +227,7 @@ public class PhoneStatusBarView extends PanelBar {
             panel.setAlpha(alpha);
         }
 
+        mBar.mFullScreenManager.update();
         mBar.updateCarrierLabelVisibility(false);
     }
 }

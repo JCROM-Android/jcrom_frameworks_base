@@ -56,6 +56,8 @@ import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 
+import com.android.systemui.FullScreenManager;
+
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
@@ -84,6 +86,8 @@ public class NavigationBarView extends LinearLayout {
     
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
+
+    private FullScreenManager mFullScreenManager;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -202,6 +206,10 @@ public class NavigationBarView extends LinearLayout {
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+    }
+
+    public void setFullScreenManager(FullScreenManager fsm) {
+        mFullScreenManager = fsm;
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -390,6 +398,33 @@ public class NavigationBarView extends LinearLayout {
         setLowProfile(false);
     }
 
+    private Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
+    }
+
     @Override
     public void onFinishInflate() {
         mRotatedViews[Surface.ROTATION_0] = 
@@ -406,14 +441,8 @@ public class NavigationBarView extends LinearLayout {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
             {//port
-                String IMAGE_FILENAME = "navibar_background_port.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_port");
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
@@ -421,14 +450,8 @@ public class NavigationBarView extends LinearLayout {
                 }
             }
             {//land
-                String IMAGE_FILENAME = "navibar_background_land.png";
                 FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
-                StringBuilder builder = new StringBuilder();
-                builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
-                builder.append(File.separator);
-                builder.append(IMAGE_FILENAME);
-                String filePath = builder.toString();
-                Drawable drawable = Drawable.createFromPath(filePath);
+                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_land");
                 if (drawable != null) {
                     f.setBackgroundDrawable(drawable);
                 }else{
@@ -464,6 +487,10 @@ public class NavigationBarView extends LinearLayout {
                f_port.setBackgroundColor(0xff000000);
                FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
                f_land.setBackgroundColor(0xff000000);
+        }
+
+        if(mFullScreenManager != null) {
+            mFullScreenManager.update();
         }
     }
 

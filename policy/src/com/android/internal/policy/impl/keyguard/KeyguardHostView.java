@@ -1584,6 +1584,23 @@ public class KeyguardHostView extends KeyguardViewBase {
                 intent, false, opts.toBundle(), null, null);
     }
 
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
+    }
+
     public void setLockScreenWallpaper() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
@@ -1593,12 +1610,12 @@ public class KeyguardHostView extends KeyguardViewBase {
 
             Drawable drawable = null;
             if (requiresRotation()) {
-                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper_land.png");
+                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper_land");
                 if (drawable == null) {
-                    drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper.png");
+                    drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper");
                 }
             } else {
-                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper.png");
+                drawable = getDrawableFromFile("lockscreen", "lockscreen_wallpaper");
             }
 
             if ( null != drawable ) {
@@ -1623,7 +1640,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         builder.append(File.separator);
         builder.append(MY_FILE_NAME);
         String filePath = builder.toString();
-        bitmapWallpaper = BitmapFactory.decodeFile(filePath);
+        String extension = checkThemeFile(filePath);
+        bitmapWallpaper = BitmapFactory.decodeFile(filePath + extension);
         Drawable d = new BitmapDrawable(getResources(), bitmapWallpaper);
         return d;
     }
