@@ -33,6 +33,7 @@ import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -48,6 +49,8 @@ public class BatteryMeterView extends View implements DemoMode {
     public static final int EMPTY = 4;
 
     public static final float SUBPIXEL = 0.4f;  // inset rects for softer edges
+
+    private static final String BATTERY_PERCENTAGE_PROPERTY = "persist.sys.battery.percentage";
 
     int[] mColors;
 
@@ -187,8 +190,7 @@ public class BatteryMeterView extends View implements DemoMode {
         }
         levels.recycle();
         colors.recycle();
-        mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
-                context.getContentResolver(), "status_bar_show_battery_percent", 0);
+        mShowPercent = ENABLE_PERCENT && SystemProperties.getBoolean(BATTERY_PERCENTAGE_PROPERTY, false);
 
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
 
@@ -205,8 +207,8 @@ public class BatteryMeterView extends View implements DemoMode {
         mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setColor(0xFFFFFFFF);
-        Typeface font = Typeface.create("sans-serif-condensed", Typeface.NORMAL);
+        mTextPaint.setColor(0xFF000000);
+        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
         mTextPaint.setTypeface(font);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
 
