@@ -80,6 +80,8 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(mView.getRecentsButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getMenuButton(), alpha, animate);
         setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), alpha, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getMyMenuButton(), alpha, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getExpandButton(), alpha, animate);
 
         // apply to lights out
         applyLightsOut(mode == MODE_LIGHTS_OUT, animate, force);
@@ -153,4 +155,18 @@ public final class NavigationBarTransitions extends BarTransitions {
             return false;
         }
     };
+
+    public void expand() {
+		try {
+	        mBarService.expandNotificationsPanel();
+        } catch (android.os.RemoteException ex) {
+        }
+    }
+
+    public void collapse() {
+		try {
+			mBarService.collapsePanels();
+        } catch (android.os.RemoteException ex) {
+        }
+    }
 }

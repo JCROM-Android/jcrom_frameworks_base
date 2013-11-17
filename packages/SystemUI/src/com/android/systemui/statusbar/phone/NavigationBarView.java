@@ -44,6 +44,13 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import android.os.SystemProperties;
+import java.io.File;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+import android.widget.FrameLayout;
+import android.os.Environment;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
@@ -232,12 +239,28 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.menu);
     }
 
+    public View getMyMenuButton() {
+        return mCurrentView.findViewById(R.id.mymenu);
+    }
+
     public View getBackButton() {
         return mCurrentView.findViewById(R.id.back);
     }
 
     public View getHomeButton() {
         return mCurrentView.findViewById(R.id.home);
+    }
+
+    public View getExpandButton() {
+        return mCurrentView.findViewById(R.id.expand);
+    }
+
+    public void expand() {
+		mBarTransitions.expand();
+    }
+
+    public void collapse() {
+		mBarTransitions.collapse();
     }
 
     // for when home is disabled, but search isn't
@@ -264,6 +287,11 @@ public class NavigationBarView extends LinearLayout {
         getIcons(mContext.getResources());
 
         super.setLayoutDirection(layoutDirection);
+
+		String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+		if (forceHobby.equals("true")) {
+    		setButtonTheme();
+		}
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -314,9 +342,11 @@ public class NavigationBarView extends LinearLayout {
 
         final boolean disableHome = ((disabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
         final boolean disableRecent = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
+        final boolean disableMyMenu = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
         final boolean disableSearch = ((disabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0);
+        final boolean disableExpand = ((disabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0);
 
         if (SLIPPERY_WHEN_DISABLED) {
             setSlippery(disableHome && disableRecent && disableBack && disableSearch);
@@ -335,6 +365,9 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
+        getSearchLight().setVisibility((disableHome && !disableSearch) ? View.VISIBLE : View.GONE);
+        getMyMenuButton() .setVisibility(disableMyMenu ? View.INVISIBLE : View.VISIBLE);
+        getExpandButton() .setVisibility(disableExpand ? View.INVISIBLE : View.VISIBLE);
 
         final boolean shouldShowSearch = disableHome && !disableSearch;
         getSearchLight().setVisibility(shouldShowSearch ? View.VISIBLE : View.GONE);
@@ -380,15 +413,66 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show) {
-        setMenuVisibility(show, false);
+        return;
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
-        if (!force && mShowMenu == show) return;
+        return;
+    }
 
-        mShowMenu = show;
+    public void setButtonTheme() {
+        Drawable drawable;
+        drawable = loadNaviKeyImage("ic_sysbar_back.png");
+        if (drawable != null) {
+            mBackIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_land.png");
+        if (drawable != null) {
+            mBackLandIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime.png");
+        if (drawable != null) {
+            mBackAltIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png");
+        if (drawable != null) {
+            mBackAltLandIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_recent.png");
+        if (drawable != null) {
+            mRecentIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_recent_land.png");
+        if (drawable != null) {
+            mRecentLandIcon = drawable;
+        }
+    }
 
-        getMenuButton().setVisibility(mShowMenu ? View.VISIBLE : View.INVISIBLE);
+    private Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
     }
 
     @Override
@@ -403,6 +487,39 @@ public class NavigationBarView extends LinearLayout {
                                                 : findViewById(R.id.rot270);
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            {//port
+                FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
+                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_port");
+                if (drawable != null) {
+                    f.setBackgroundDrawable(drawable);
+                }else{
+                    //f.setBackgroundColor(0xff000000);
+                }
+            }
+            {//land
+                FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
+                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_land");
+                if (drawable != null) {
+                    f.setBackgroundDrawable(drawable);
+                }else{
+                    //f.setBackgroundColor(0xff000000);
+                }
+            }
+
+            setupButtons(R.id.mymenu,      "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png");
+            setupButtons(R.id.home,        "ic_sysbar_home.png",   "ic_sysbar_home_land.png");
+            setupButtons(R.id.expand,      "ic_sysbar_expand.png", "ic_sysbar_expand_land.png");
+            setButtonTheme();
+
+        }else{
+            //FrameLayout f_port = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
+            //f_port.setBackgroundColor(0xff000000);
+            //FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
+            //f_land.setBackgroundColor(0xff000000);
+        }
 
         watchForAccessibilityChanges();
     }
@@ -452,6 +569,35 @@ public class NavigationBarView extends LinearLayout {
 
     public boolean isVertical() {
         return mVertical;
+    }
+
+    private Drawable loadNaviKeyImage(String filename) {
+        String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
+        return Drawable.createFromPath(filepath);
+    }
+
+    private void setupButtons(int id, String filenameHorz, String filenameVert) {
+        for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
+            View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
+            if (view instanceof LinearLayout) {
+                boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
+                if (vert) {
+                    setButtonImage(view, id, filenameVert);
+                } else {
+                    setButtonImage(view, id, filenameHorz);
+                }
+            }
+        }
+    }
+
+    private void setButtonImage(View parent, int id, String filename) {
+        View view = parent.findViewById(id);
+        if (view instanceof ImageView) {
+            Drawable drawable = loadNaviKeyImage(filename);
+            if (drawable != null) {
+                ((ImageView)view).setImageDrawable(drawable);
+            }
+        }
     }
 
     public void reorient() {
@@ -578,6 +724,8 @@ public class NavigationBarView extends LinearLayout {
         final View home = getHomeButton();
         final View recent = getRecentsButton();
         final View menu = getMenuButton();
+        final View mymenu = getMyMenuButton();
+        final View expand = getExpandButton();
 
         pw.println("      back: "
                 + PhoneStatusBar.viewInfo(back)
@@ -594,6 +742,14 @@ public class NavigationBarView extends LinearLayout {
         pw.println("      menu: "
                 + PhoneStatusBar.viewInfo(menu)
                 + " " + visibilityToString(menu.getVisibility())
+                );
+        pw.println("      mymenu: "
+                + PhoneStatusBar.viewInfo(mymenu)
+                + " " + visibilityToString(mymenu.getVisibility())
+                );
+        pw.println("      expand: "
+                + PhoneStatusBar.viewInfo(expand)
+                + " " + visibilityToString(expand.getVisibility())
                 );
         pw.println("    }");
     }

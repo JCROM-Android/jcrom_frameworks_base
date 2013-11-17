@@ -832,6 +832,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
+    private View.OnLongClickListener mExpandLongClickListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            toggleExpandPanael();
+            return true;
+        }
+    };
+
+    private View.OnClickListener mExpandClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+        		if (mExpandedVisible) {
+					mNavigationBarView.collapse();
+        		} else {
+					mNavigationBarView.expand();
+        		}
+        }
+    };
+
     private int mShowSearchHoldoff = 0;
     private Runnable mShowSearchPanel = new Runnable() {
         public void run() {
@@ -875,6 +892,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
+        mNavigationBarView.getExpandButton().setOnClickListener(mExpandClickListener);
+        mNavigationBarView.getExpandButton().setOnLongClickListener(mExpandLongClickListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
         updateSearchPanel();
