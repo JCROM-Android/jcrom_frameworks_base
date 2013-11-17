@@ -47,6 +47,7 @@ import com.android.internal.telephony.ITelephony;
 
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.KeyEvent;
 
 public final class ShutdownThread extends Thread {
     // constants
@@ -125,15 +126,57 @@ public final class ShutdownThread extends Thread {
         Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
 
         if (confirm) {
-            final CloseDialogReceiver closer = new CloseDialogReceiver(context);
+//          final CloseDialogReceiver closer = new CloseDialogReceiver(context);
+            final CloseDialogReceiver closer;
+        if (mReboot) {
+            closer = new CloseDialogReceiver(context);
             if (sConfirmDialog != null) {
                 sConfirmDialog.dismiss();
             }
             sConfirmDialog = new AlertDialog.Builder(context)
                     .setTitle(mRebootSafeMode
                             ? com.android.internal.R.string.reboot_safemode_title
-                            : com.android.internal.R.string.power_off)
-                    .setMessage(resourceId)
+                            : com.android.internal.R.string.reboot_system)
+                    .setSingleChoiceItems(com.android.internal.R.array.shutdown_reboot_options, 0, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (which < 0)
+                                return;
+                            String actions[] = context.getResources().getStringArray(com.android.internal.R.array.shutdown_reboot_actions);
+                            if (actions != null && which < actions.length)
+                                mRebootReason = actions[which];
+                        }
+                    })
+                    .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mReboot = true;
+                            beginShutdownSequence(context);
+                        }
+                    })
+                    .setNegativeButton(com.android.internal.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mReboot = false;
+                            dialog.cancel();
+                        }
+                    })
+                    .create();
+                    sConfirmDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                        public boolean onKey (DialogInterface dialog, int keyCode, KeyEvent event) {
+                            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                                mReboot = false;
+                                dialog.cancel();
+                            }
+                            return true;
+                        }
+                    });
+        } else {
+            closer = new CloseDialogReceiver(context);
+            if (sConfirmDialog != null) {
+                sConfirmDialog.dismiss();
+            }
+            sConfirmDialog = new AlertDialog.Builder(context)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(com.android.internal.R.string.power_off)
+                    .setMessage(com.android.internal.R.string.shutdown_confirm)
                     .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             beginShutdownSequence(context);
@@ -141,7 +184,7 @@ public final class ShutdownThread extends Thread {
                     })
                     .setNegativeButton(com.android.internal.R.string.no, null)
                     .create();
-            closer.dialog = sConfirmDialog;
+        }
             sConfirmDialog.setOnDismissListener(closer);
             sConfirmDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             sConfirmDialog.show();

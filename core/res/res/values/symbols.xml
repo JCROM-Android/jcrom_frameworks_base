@@ -1761,5 +1761,10 @@
   <java-symbol type="layout" name="screenb_simple" />
   <java-symbol type="layout" name="screenb_title" />
   <java-symbol type="layout" name="screenb_title_icons" />
+  <java-symbol type="string" name="global_action_reboot" />
+  <java-symbol type="array" name="shutdown_reboot_options" />
+  <java-symbol type="array" name="shutdown_reboot_actions" />
+  <java-symbol type="string" name="reboot_system" />
+  <java-symbol type="string" name="reboot_progress" />
 
 </resources>

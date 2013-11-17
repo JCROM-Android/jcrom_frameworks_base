@@ -2028,6 +2028,8 @@
   <public type="style" name="Widget.DeviceDefault.CheckedTextView" id="0x010301db" />
   <public type="style" name="Widget.DeviceDefault.Light.CheckedTextView" id="0x010301dc" />
 
+  <public type="drawable" name="ic_lock_reboot" id="0x0108009e" />
+
 <!-- ===============================================================
      Resources added in version 18 of the platform (Jelly Bean MR2)
      =============================================================== -->
