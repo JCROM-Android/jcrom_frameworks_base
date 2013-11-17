@@ -55,6 +55,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.graphics.Rect;
 
 import com.android.systemui.R;
 
@@ -62,6 +63,10 @@ import java.io.File;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.SystemProperties;
 
 /**
  * POD used in the AsyncTask which saves an image in the background.
@@ -319,6 +324,9 @@ class GlobalScreenshot {
     private static final float SCREENSHOT_FAST_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.6f;
     private static final float SCREENSHOT_DROP_OUT_MIN_SCALE_OFFSET = 0f;
 
+    static final int SCREEN_SHOT_NORMAL = 1;
+    static final int SCREEN_SHOT_FRAME = 2;
+
     private Context mContext;
     private WindowManager mWindowManager;
     private WindowManager.LayoutParams mWindowLayoutParams;
@@ -432,13 +440,16 @@ class GlobalScreenshot {
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible) {
+    void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible, int frame) {
         // We need to orient the screenshot correctly (and the Surface api seems to take screenshots
         // only in the natural orientation of the device :!)
         mDisplay.getRealMetrics(mDisplayMetrics);
         float[] dims = {mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels};
         float degrees = getDegreesForRotation(mDisplay.getRotation());
         boolean requiresRotation = (degrees > 0);
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+
         if (requiresRotation) {
             // Get the dimensions of the device in its native orientation
             mDisplayMatrix.reset();
@@ -448,13 +459,7 @@ class GlobalScreenshot {
             dims[1] = Math.abs(dims[1]);
         }
 
-        // Take the screenshot
         mScreenBitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1]);
-        if (mScreenBitmap == null) {
-            notifyScreenshotError(mContext, mNotificationManager);
-            finisher.run();
-            return;
-        }
 
         if (requiresRotation) {
             // Rotate the screenshot to the current orientation
@@ -471,6 +476,45 @@ class GlobalScreenshot {
             mScreenBitmap = ss;
         }
 
+        if (frame == SCREEN_SHOT_FRAME) {
+            if (forceHobby.equals("true")) {
+
+                Drawable drawable = null;
+                if (requiresRotation) {
+                    drawable = getDrawableFromFile("screenshot_frame_land.png");
+                    if(null == drawable){
+                       drawable = getDrawableFromFile("screenshot_frame.png");
+                    }
+                }else{
+                    drawable = getDrawableFromFile("screenshot_frame.png");
+                }
+
+                if( null != drawable ) {
+                    Bitmap ss = Bitmap.createBitmap(mDisplayMetrics.widthPixels,
+                        mDisplayMetrics.heightPixels, Bitmap.Config.ARGB_8888);
+                    Canvas c = new Canvas(ss);
+                    c.drawBitmap(mScreenBitmap, 0, 0, null);
+                    Bitmap myframe = ((BitmapDrawable) drawable).getBitmap();
+
+                    boolean rescaling = false;
+                    if(mDisplayMetrics.widthPixels < myframe.getWidth()
+                       && mDisplayMetrics.heightPixels < myframe.getHeight()){
+                       rescaling = true;
+                    }
+                    if(!rescaling){
+                       c.drawBitmap(myframe, 0, 0, null);
+                    }else{
+                       Rect src=new Rect(0, 0, myframe.getWidth(), myframe.getHeight());
+                       Rect dst=new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels);
+                       c.drawBitmap(myframe, src, dst, null);
+                    }
+
+                    c.setBitmap(null);
+                    mScreenBitmap = ss;
+                }
+            }
+        }
+
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
@@ -480,6 +524,14 @@ class GlobalScreenshot {
                 statusBarVisible, navBarVisible);
     }
 
+    private Drawable getDrawableFromFile(String MY_FRAME_FILE) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/screenshot/");
+        builder.append(File.separator);
+        builder.append(MY_FRAME_FILE);
+        String filePath = builder.toString();
+        return Drawable.createFromPath(filePath);
+    }
 
     /**
      * Starts the animation after taking the screenshot

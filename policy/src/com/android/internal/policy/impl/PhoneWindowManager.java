@@ -158,6 +158,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
 
+    static final int SCREEN_SHOT_NORMAL = 1;
+    static final int SCREEN_SHOT_FRAME = 2;
+
     /**
      * These are the system UI flags that, when changing, can cause the layout
      * of the screen to change.
@@ -451,6 +454,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private long mVolumeDownKeyTime;
     private boolean mVolumeDownKeyConsumedByScreenshotChord;
     private boolean mVolumeUpKeyTriggered;
+    private long mVolumeUpKeyTime;
+    private boolean mVolumeUpKeyConsumedByScreenshotChord;
     private boolean mPowerKeyTriggered;
     private long mPowerKeyTime;
 
@@ -708,8 +713,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return ViewConfiguration.getGlobalActionKeyTimeout();
     }
 
+    private void interceptScreenshotChordFrame() {
+        if (mScreenshotChordEnabled
+                && mVolumeUpKeyTriggered && mPowerKeyTriggered && !mVolumeDownKeyTriggered) {
+            final long now = SystemClock.uptimeMillis();
+            if (now <= mVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
+                    && now <= mPowerKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
+                mVolumeUpKeyConsumedByScreenshotChord = true;
+                cancelPendingPowerKeyAction();
+
+                mHandler.postDelayed(mScreenshotChordFrameLongPress,
+                        ViewConfiguration.getGlobalActionKeyTimeout());
+            }
+        }
+    }
+
     private void cancelPendingScreenshotChordAction() {
         mHandler.removeCallbacks(mScreenshotRunnable);
+        mHandler.removeCallbacks(mScreenshotChordFrameLongPress);
     }
 
     private final Runnable mPowerLongPress = new Runnable() {
@@ -750,7 +771,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final Runnable mScreenshotRunnable = new Runnable() {
         @Override
         public void run() {
-            takeScreenshot();
+            takeScreenshot(SCREEN_SHOT_NORMAL);
+        }
+    };
+
+    private final Runnable mScreenshotChordFrameLongPress = new Runnable() {
+        public void run() {
+            takeScreenshot(SCREEN_SHOT_FRAME);
         }
     };
 
@@ -1971,6 +1998,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     && mVolumeDownKeyConsumedByScreenshotChord) {
                 if (!down) {
                     mVolumeDownKeyConsumedByScreenshotChord = false;
+                }
+                return -1;
+            }
+        }
+
+        if (mScreenshotChordEnabled && (flags & KeyEvent.FLAG_FALLBACK) == 0) {
+            if (mVolumeUpKeyTriggered && !mPowerKeyTriggered) {
+                final long now = SystemClock.uptimeMillis();
+                final long timeoutTime = mVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
+                if (now < timeoutTime) {
+                    return timeoutTime - now;
+                }
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                    && mVolumeUpKeyConsumedByScreenshotChord) {
+                if (!down) {
+                    mVolumeUpKeyConsumedByScreenshotChord = false;
                 }
                 return -1;
             }
@@ -3720,13 +3764,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     // Assume this is called from the Handler thread.
-    private void takeScreenshot() {
+    private void takeScreenshot(int shot) {
         synchronized (mScreenshotLock) {
             if (mScreenshotConnection != null) {
                 return;
             }
-            ComponentName cn = new ComponentName("com.android.systemui",
-                    "com.android.systemui.screenshot.TakeScreenshotService");
+            ComponentName cn;
+            if (shot == SCREEN_SHOT_FRAME) {
+                cn = new ComponentName("com.android.systemui", "com.android.systemui.screenshot.TakeScreenshotFrameService");
+            } else {
+                cn = new ComponentName("com.android.systemui", "com.android.systemui.screenshot.TakeScreenshotService");
+            }
             Intent intent = new Intent();
             intent.setComponent(cn);
             ServiceConnection conn = new ServiceConnection() {
@@ -3866,8 +3914,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (isScreenOn && !mVolumeUpKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                             mVolumeUpKeyTriggered = true;
+                            mVolumeUpKeyTime = event.getDownTime();
+                            mVolumeUpKeyConsumedByScreenshotChord = false;
                             cancelPendingPowerKeyAction();
-                            cancelPendingScreenshotChordAction();
+                            interceptScreenshotChordFrame();
                         }
                     } else {
                         mVolumeUpKeyTriggered = false;
@@ -3959,6 +4009,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mPowerKeyTriggered = true;
                         mPowerKeyTime = event.getDownTime();
                         interceptScreenshotChord();
+                        interceptScreenshotChordFrame();
                     }
 
                     ITelephony telephonyService = getTelephonyService();
@@ -3981,7 +4032,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                     interceptPowerKeyDown(!isScreenOn || hungUp
-                            || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered);
+                            || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered || mVolumeUpKeyTriggered);
                 } else {
                     mPowerKeyTriggered = false;
                     cancelPendingScreenshotChordAction();
