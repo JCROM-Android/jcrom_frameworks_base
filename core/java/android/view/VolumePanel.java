@@ -35,6 +35,7 @@ import android.media.ToneGenerator;
 import android.media.VolumeController;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.Message;
 import android.os.Vibrator;
 import android.util.Log;
@@ -61,6 +62,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 {
     private static final String TAG = "VolumePanel";
     private static boolean LOGD = false;
+    private static final String VOICE_CAPABLE_PROPERTY = "persist.sys.voice.capable";
 
     /**
      * The delay before playing a sound. This small period exists so the user
@@ -319,7 +321,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
 
-        mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
+        //mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
+        mVoiceCapable = SystemProperties.getBoolean(VOICE_CAPABLE_PROPERTY, true);
         mShowCombinedVolumes = !mVoiceCapable && !useMasterVolume;
         // If we don't want to show multiple volumes, hide the settings button and divider
         if (!mShowCombinedVolumes) {
