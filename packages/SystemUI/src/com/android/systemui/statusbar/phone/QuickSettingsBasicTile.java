@@ -23,7 +23,7 @@ import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import android.graphics.Color;
 import com.android.systemui.R;
 
 class QuickSettingsBasicTile extends QuickSettingsTileView {
@@ -45,7 +45,8 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
             FrameLayout.LayoutParams.MATCH_PARENT,
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
-        setBackgroundResource(R.drawable.qs_tile_background);
+        //setBackgroundResource(R.drawable.qs_tile_background);
+        setBackgroundColor(Color.TRANSPARENT);
         addView(LayoutInflater.from(context).inflate(layoutId, null),
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
@@ -77,6 +78,10 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
 
     public void setText(CharSequence text) {
         mTextView.setText(text);
+    }
+
+    public void setTextColor(int color) {
+        mTextView.setTextColor(color);
     }
 
     public void setTextResource(int resId) {

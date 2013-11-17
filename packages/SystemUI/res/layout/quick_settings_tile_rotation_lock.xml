@@ -13,10 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.statusbar.phone.QuickSettingsTileView
+<TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/TextAppearance.QuickSettings.TileView"
+    android:id="@+id/rotation_lock_textview"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/quick_settings_cell_height"
-    android:background="#00000000"
-/>
-
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    />

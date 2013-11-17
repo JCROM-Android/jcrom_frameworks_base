@@ -22,8 +22,8 @@
         android:id="@+id/rssi_images"
         android:layout_marginTop="@dimen/qs_tile_margin_above_icon"
         android:layout_marginBottom="@dimen/qs_tile_margin_below_icon"
-        android:layout_width="@dimen/qs_tile_icon_size"
-        android:layout_height="@dimen/qs_tile_icon_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:layout_centerHorizontal="true"
         >
@@ -31,13 +31,15 @@
             android:id="@+id/rssi_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:paddingBottom="10dp"
             />
         <ImageView
             android:id="@+id/rssi_overlay_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:paddingBottom="10dp"
             />
     </FrameLayout>
     <ImageView
