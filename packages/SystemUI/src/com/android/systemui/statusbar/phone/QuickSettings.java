@@ -516,12 +516,12 @@ class QuickSettings {
                             R.string.accessibility_quick_settings_wifi,
                             wifiState.signalContentDescription,
                             (wifiState.connected) ? wifiState.label : ""));
+                    if(null != mLabelListColor.get(WIFI_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(WIFI_COLOR), 16));
+                        tv.setTextColor(color);
+                    }
                 }
             });
-            if(null != mLabelListColor.get(WIFI_COLOR)) {
-                //JCROM int color = (int)(Long.parseLong(mLabelListColor.get(WIFI_COLOR), 16));
-                //JCROM wifiTile.setTextColor(color);
-            }
             parent.addView(wifiTile);
         } else if (tile.equals(DATA)) {
                 if (mModel.deviceHasMobileData()) {
@@ -640,12 +640,12 @@ class QuickSettings {
                     ((TextView)batteryTile.findViewById(R.id.text)).setText(t);
                     batteryTile.setContentDescription(
                             mContext.getString(R.string.accessibility_quick_settings_battery, t));
+                    if(null != mLabelListColor.get(BATTERY_COLOR)) {
+                        int color = (int)(Long.parseLong(mLabelListColor.get(BATTERY_COLOR), 16));
+                        ((TextView)batteryTile.findViewById(R.id.text)).setTextColor(color);
+                    }
                 }
             });
-            if(null != mLabelListColor.get(BATTERY_COLOR)) {
-                //JCROM int color = (int)(Long.parseLong(mLabelListColor.get(BATTERY_COLOR), 16));
-                //JCROM batteryTile.setTextColor(color);
-            }
             parent.addView(batteryTile);
         } else if (tile.equals(AIRPLANE)) {
             // Airplane Mode
