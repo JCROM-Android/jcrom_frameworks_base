@@ -63,6 +63,7 @@ public class TelephonyManager {
     private final Context mContext;
 
     private static final String VOICE_CAPABLE_PROPERTY = "persist.sys.voice.capable";
+    private static final String SMS_CAPABLE_PROPERTY = "persist.sys.sms.capable";
 
     /** @hide */
     public TelephonyManager(Context context) {
@@ -1370,8 +1371,9 @@ public class TelephonyManager {
      */
     public boolean isSmsCapable() {
         if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_sms_capable);
+        //return mContext.getResources().getBoolean(
+        //        com.android.internal.R.bool.config_sms_capable);
+        return SystemProperties.getBoolean(SMS_CAPABLE_PROPERTY, true);
     }
 
     /**
