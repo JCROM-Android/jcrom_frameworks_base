@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.Log;
 import android.view.View;
+import android.os.SystemProperties;
 
 import com.android.systemui.R;
 
@@ -76,8 +77,15 @@ public class BarTransitions {
         }
 
         mColorDrawable = new ColorDrawable(mOpaque);
-        mTransitionDrawable = new TransitionDrawable(
-                new Drawable[] { res.getDrawable(gradientResourceId), mColorDrawable });
+        String gradientStr = SystemProperties.get("persist.sys.prop.gradient");
+        if(!gradientStr.equals("true")) {
+            mTransitionDrawable = new TransitionDrawable(
+                    new Drawable[] { res.getDrawable(gradientResourceId), mColorDrawable });
+        } else {
+            ColorDrawable transColorDrawable = new ColorDrawable(res.getColor(R.color.system_bar_background_transparent));
+            mTransitionDrawable = new TransitionDrawable(
+                    new Drawable[] { transColorDrawable, mColorDrawable });
+        }
         mTransitionDrawable.setCrossFadeEnabled(true);
         mTransitionDrawable.resetTransition();
         if (mSupportsTransitions) {
