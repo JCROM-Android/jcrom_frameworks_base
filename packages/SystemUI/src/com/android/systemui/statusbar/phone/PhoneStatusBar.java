@@ -80,6 +80,24 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.os.Environment;
+import android.os.SystemProperties;
+
+import java.io.File;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+import android.os.Environment;
+import android.graphics.drawable.LevelListDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.util.StateSet;
+import android.os.SystemProperties;
+import android.view.Surface;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import com.android.systemui.statusbar.LatestItemView;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.DemoMode;
@@ -151,6 +169,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private float mFlingGestureMaxOutputVelocityPx; // how fast can it really go? (should be a little
                                                     // faster than mSelfCollapseVelocityPx)
+
+    private int mNotificationPictureNum = 0;
+    private boolean mNotificationPictureUse = false;
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -260,6 +281,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+
+    Drawable mStatusBarDrawable = null;
+    Drawable mStatusBarLandDrawable = null;
+    Drawable mNotificationTrackingDrawable = null;
+    Drawable mNotificationTrackingLandDrawable = null;
+    Drawable mQuickSettingDrawable = null;
+    Drawable mQuickSettingLandDrawable = null;
+    LevelListDrawable mlevelListDrawable = null;
+    LevelListDrawable mlevelListLandDrawable = null;
 
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
@@ -373,8 +403,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
-        mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
-                R.layout.super_status_bar, null);
+        String notification = SystemProperties.get("persist.sys.notification");
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (notification.equals("true")) {
+            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                    R.layout.super_status_bar, null);
+        }else {
+            mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
+                    R.layout.super_status_bar_top, null);
+        }
+
         mStatusBarWindow.mService = this;
         mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -426,6 +464,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         updateShowSearchHoldoff();
 
+        //prepareStatusBarBackground();
+        //updateStatusBarBackground();
+
         try {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
@@ -465,6 +506,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
+        if (forceHobby.equals("true")) {
+            setClearButtonImage("ic_notify_clear.png");
+        }
         mClearButton.setOnClickListener(mClearButtonListener);
         mClearButton.setAlpha(0f);
         mClearButton.setVisibility(View.INVISIBLE);
@@ -486,7 +530,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mHasSettingsPanel) {
                 if (mStatusBarView.hasFullWidthNotifications()) {
                     // the settings panel is hiding behind this button
-                    mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+                    if (forceHobby.equals("true")) {
+                        setQuickSettingsImage("ic_notify_quicksettings.png");
+                    } else {
+                        mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+                    }
                     mSettingsButton.setVisibility(View.VISIBLE);
                 } else {
                     // there is a settings panel, but it's on the other side of the (large) screen
@@ -505,6 +553,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mHasFlipSettings) {
             mNotificationButton = (ImageView) mStatusBarWindow.findViewById(R.id.notification_button);
             if (mNotificationButton != null) {
+                if (forceHobby.equals("true")) {
+                    setNotificationButtonImage("ic_notify_open.png");
+                }
                 mNotificationButton.setOnClickListener(mNotificationButtonListener);
             }
         }
@@ -522,6 +573,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         TickerView tickerView = (TickerView)mStatusBarView.findViewById(R.id.tickerText);
         tickerView.mTicker = mTicker;
+
+        prepareNotificationBackground();
+        updateNotificationBackground();
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
@@ -639,6 +693,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(ACTION_DEMO);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        if (forceHobby.equals("true")) {
+            String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
+            String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
+            String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
+            builder.append(File.separator);
+            builder.append(MY_NOTIFICATION_FORMAT);
+            String filePathFormat = builder.toString();
+
+            int i = 0;
+            while (i < 100) {
+                String pathPressed = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+                String pathNormal = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+
+                String extension = checkThemeFile(pathPressed);
+                Drawable drawablePressed = Drawable.createFromPath(pathPressed + extension);
+                extension = checkThemeFile(pathNormal);
+                Drawable drawableNormal = Drawable.createFromPath(pathNormal + extension);
+                if ((null == drawablePressed) || (null == drawableNormal)) {
+                    break;
+                } else {
+                    i++;
+                }
+            }
+            mNotificationPictureNum = i;
+            if (mNotificationPictureNum > 0 ) {
+                mNotificationPictureUse = true;
+                prepareLevelListDrawable();
+            } else {
+                mNotificationPictureUse = false;
+            }
+        }
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
@@ -2303,6 +2392,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         updateCarrierLabelVisibility(false);
+
+        if (requiresRotation()) {
+            if(mQuickSettingLandDrawable != null) {
+                mSettingsPanel.setBackgroundDrawable(mQuickSettingLandDrawable);
+            }else if(mQuickSettingDrawable != null) {
+                mSettingsPanel.setBackgroundDrawable(mQuickSettingDrawable);
+            }
+        }else {
+            if(mQuickSettingDrawable != null){
+                mSettingsPanel.setBackgroundDrawable(mQuickSettingDrawable);
+            }
+        }
     }
 
     // called by makeStatusbar and also by PhoneStatusBarView
@@ -2776,4 +2877,308 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             ((DemoMode)v).dispatchDemoCommand(command, args);
         }
     }
+
+//JCROM
+    public boolean requiresRotation() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display dp = wm.getDefaultDisplay();
+
+        return dp.getRotation()==Surface.ROTATION_90 || dp.getRotation()==Surface.ROTATION_270;
+    }
+
+    public Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
+    }
+
+/*
+    public void prepareStatusBarBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background");
+            mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land");
+        }
+    }
+
+    public void updateStatusBarBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        FrameLayout f = (FrameLayout) mStatusBarView.findViewById(R.id.status_bar_background);
+        if (forceHobby.equals("true")) {
+            if (requiresRotation()) {
+                if(mStatusBarLandDrawable != null){
+                    f.setBackgroundDrawable(mStatusBarLandDrawable);
+                }else if(mStatusBarDrawable != null){
+                    f.setBackgroundDrawable(mStatusBarDrawable);
+                }else{
+	            f.setBackgroundColor(0xff000000);
+                }
+            }else{
+                if(mStatusBarDrawable != null){
+                    f.setBackgroundDrawable(mStatusBarDrawable);
+                }else{
+	            f.setBackgroundColor(0xff000000);
+                }
+            }
+        }else{
+            f.setBackgroundColor(0xff000000);
+        }
+    }
+*/
+
+    public void prepareNotificationBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+
+            if(mNotificationPanelMarginPx==0){ // for Phone UI
+
+                mNotificationTrackingDrawable = getDrawableFromFile("notification", "notification_tracking_bg");
+                mNotificationTrackingLandDrawable = getDrawableFromFile("notification", "notification_tracking_bg_land");
+
+            }else{  // for Phone UI(Large)
+
+                mNotificationTrackingDrawable = getLargeNotificationBackground("notification_tracking_bg");
+                mNotificationTrackingLandDrawable = getLargeNotificationBackground("notification_tracking_bg_land");
+
+                mQuickSettingDrawable = getLargeNotificationBackground("quick_setting_bg");
+                mQuickSettingLandDrawable = getLargeNotificationBackground("quick_setting_bg_land");
+
+            }
+        }
+    }
+
+    public Drawable getLargeNotificationBackground(String filename){
+
+        Drawable d_land = getDrawableFromFile("notification", filename);
+
+        if(d_land != null){
+            Bitmap bmp_org = ((BitmapDrawable)d_land).getBitmap();
+
+            int w_org = bmp_org.getWidth();
+            int h_org = bmp_org.getHeight();
+            Rect r_org = new Rect(0, 0, w_org, h_org);
+
+            Resources res = mContext.getResources();
+            float density = res.getDisplayMetrics().density;
+            int margin = (int)(16 * density + 0.5f);
+
+            int w_large = (int) res.getDimension(R.dimen.notification_panel_width);
+            int w_target = w_large - 2*margin;
+
+            int h_target = (int) (h_org*w_target*density/w_org + 0.5f);
+            int h_large =  h_target + (int)((margin+1)*density + 0.5f);
+
+            Rect r_target = new Rect(margin, 0, margin + w_target, h_target);
+
+            Bitmap bmp_large = Bitmap.createBitmap(w_large, h_large, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bmp_large);
+            c.drawBitmap(bmp_org, r_org, r_target, null);
+
+            return new BitmapDrawable(bmp_large);
+
+        }else{
+            return null;
+        }
+    }
+
+    public void updateNotificationBackground() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
+            if (requiresRotation()) {
+                if(mNotificationTrackingLandDrawable != null){
+                    f.setBackgroundDrawable(mNotificationTrackingLandDrawable);
+                }else if(mNotificationTrackingDrawable != null){
+                    f.setBackgroundDrawable(mNotificationTrackingDrawable);
+                }
+            }else{
+                if(mNotificationTrackingDrawable != null){
+                    f.setBackgroundDrawable(mNotificationTrackingDrawable);
+                }
+            }
+        }
+    }
+
+
+    public Drawable getNotificationDrawableFromFile(String MY_FILE_FORMAT, int i, String suffix) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_FORMAT);
+        String filePathFormat = builder.toString();
+
+        String filePath = String.format(filePathFormat, i, suffix);
+        String extension = checkThemeFile(filePath);
+
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private void prepareLevelListDrawable() {
+
+        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
+        String MY_NOTIFICATION_LAND_FORMAT = "notification_item_background_land_%02d_%s";
+        String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
+        String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
+
+        mlevelListDrawable = new LevelListDrawable();
+        mlevelListLandDrawable = new LevelListDrawable();
+
+        for (int i = 0; i < mNotificationPictureNum; i++) {
+            StateListDrawable stateListLandDrawable = new StateListDrawable();
+            StateListDrawable stateListDrawable = new StateListDrawable();
+            Drawable drawablePressed=null;
+            Drawable drawableNormal=null;
+
+            // for landscape
+            drawablePressed = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_LAND_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            if(null == drawablePressed){
+                drawablePressed = getNotificationDrawableFromFile(
+                               MY_NOTIFICATION_FORMAT,
+                               i,
+                               MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            }
+            stateListLandDrawable.addState(new int[] { android.R.attr.state_pressed }, drawablePressed);
+
+            drawableNormal = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_LAND_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+            if(null == drawableNormal){
+                drawableNormal = getNotificationDrawableFromFile(
+                               MY_NOTIFICATION_FORMAT,
+                               i,
+                               MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+            }
+            stateListLandDrawable.addState(StateSet.WILD_CARD, drawableNormal);
+
+            mlevelListLandDrawable.addLevel(i, i, stateListLandDrawable);
+
+            // for portrait
+            drawablePressed = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            stateListDrawable.addState(new int[] { android.R.attr.state_pressed }, drawablePressed);
+
+            drawableNormal = getNotificationDrawableFromFile(
+                           MY_NOTIFICATION_FORMAT,
+                           i,
+                           MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+            stateListDrawable.addState(StateSet.WILD_CARD, drawableNormal);
+
+            mlevelListDrawable.addLevel(i, i, stateListDrawable);
+        }
+    }
+
+    public void registerLevelListDrawable(View v) {
+        if(requiresRotation()){
+            if(mlevelListLandDrawable != null){
+		LevelListDrawable drawable = (LevelListDrawable) mlevelListLandDrawable.getConstantState().newDrawable();
+                int nowLevel = (int) (Math.random() * mNotificationPictureNum);
+                drawable.setLevel(nowLevel);
+                ((LatestItemView)v).setDrawable(drawable.getCurrent());
+            }
+        }else{
+            if(mlevelListDrawable != null){
+		LevelListDrawable drawable = (LevelListDrawable) mlevelListDrawable.getConstantState().newDrawable();
+                int nowLevel = (int) (Math.random() * mNotificationPictureNum);
+                drawable.setLevel(nowLevel);
+                ((LatestItemView)v).setDrawable(drawable.getCurrent());
+            }
+        }
+    }
+
+
+    @Override
+    protected void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
+
+        if (sbn.getNotification().contentView.getLayoutId() !=
+                com.android.internal.R.layout.notification_template_base) {
+            int version = 0;
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
+                version = info.targetSdkVersion;
+            } catch (NameNotFoundException ex) {
+                Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
+            }
+            if (version > 0 && version < Build.VERSION_CODES.GINGERBREAD) {
+                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+            } else {
+                if (true != mNotificationPictureUse) {
+                    content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
+                }
+            }
+        }
+
+        if (true == mNotificationPictureUse){
+            registerLevelListDrawable(content);
+        }else{
+            content.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
+        }
+    }
+
+    public void toggleExpandPanael() {
+        if (mExpandedVisible) {
+            if (mStatusBarView.hasFullWidthNotifications()) { // Phone
+                flipPanels();
+            } else { // Phone(Large)
+                if(mSettingsPanel.getVisibility() != View.VISIBLE) {
+                    animateExpandSettingsPanel();
+                } else {
+                    animateExpandNotificationsPanel();
+                }
+            }
+        }
+    }
+
+    private void setQuickSettingsImage(String filename) {
+        Drawable drawable = loadButtonImage(filename);
+        if (drawable != null) {
+            mSettingsButton.setImageDrawable(drawable);
+        }
+    }
+
+    private void setNotificationButtonImage(String filename) {
+        Drawable drawable = loadButtonImage(filename);
+        if (drawable != null) {
+            mNotificationButton.setImageDrawable(drawable);
+        }
+    }
+
+    private void setClearButtonImage(String filename) {
+        Drawable drawable = loadButtonImage(filename);
+        if (drawable != null) {
+            ((ImageView)mClearButton).setImageDrawable(drawable);
+        }
+    }
+
+    private Drawable loadButtonImage(String filename) {
+        String filepath = Environment.getDataDirectory().toString() + "/theme/notification/" + filename;
+        return Drawable.createFromPath(filepath);
+    }
+
 }
