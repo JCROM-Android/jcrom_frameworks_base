@@ -80,6 +80,8 @@ public class KeyguardViewManager {
     private boolean mScreenOn = false;
     private LockPatternUtils mLockPatternUtils;
 
+    private static final String LOCKSCREEN_ROTATE_PROPERTY = "persist.sys.lockscreen.rotate";
+
     private KeyguardUpdateMonitorCallback mBackgroundChanger = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onSetBackground(Bitmap bmp) {
@@ -140,8 +142,10 @@ public class KeyguardViewManager {
 
     private boolean shouldEnableScreenRotation() {
         Resources res = mContext.getResources();
+        String rotation = SystemProperties.get(LOCKSCREEN_ROTATE_PROPERTY);
         return SystemProperties.getBoolean("lockscreen.rot_override",false)
-                || res.getBoolean(R.bool.config_enableLockScreenRotation);
+                || res.getBoolean(com.android.internal.R.bool.config_enableLockScreenRotation)
+                || rotation.equals("true");
     }
 
     private boolean shouldEnableTranslucentDecor() {
