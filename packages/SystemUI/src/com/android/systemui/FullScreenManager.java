@@ -135,7 +135,7 @@ public class FullScreenManager {
         }
     }
 
-    private boolean checkFullWallpaper() {
+    public boolean checkFullWallpaper() {
         if((fullWallpaper.equals("true")) && (forceHobby.equals("true"))) {
             return true;
         }else {

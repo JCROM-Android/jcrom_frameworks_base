@@ -107,8 +107,12 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mBar.updateStatusBarBackground();
-        mBar.updateNotificationBackground();
+        if(mBar.mFullScreenManager.checkFullWallpaper()){
+            mBar.mFullScreenManager.update();
+        }else{
+            mBar.updateStatusBarBackground();
+            mBar.updateNotificationBackground();
+        }
     }
 
     @Override
