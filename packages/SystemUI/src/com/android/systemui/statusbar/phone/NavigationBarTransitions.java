@@ -28,6 +28,10 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
+import android.os.SystemProperties;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+
 public final class NavigationBarTransitions extends BarTransitions {
 
     private final NavigationBarView mView;
@@ -55,16 +59,45 @@ public final class NavigationBarTransitions extends BarTransitions {
         transitionTo(mRequestedMode, false /*animate*/);
     }
 
+    public void transitionJcrom(int mode, boolean animate, boolean transition) {
+        if(null == mView) {
+            return;
+        }
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if(!(forceHobby.equals("true"))) {
+            return;
+        }
+
+        if(mode == MODE_TRANSLUCENT) {
+            initBarTransitions(mView, R.drawable.nav_background);
+            if(transition) {
+                transitionTo(mode, animate);
+            }
+        }else {
+            Drawable drawable = null;
+            if(requiresRotation()) {
+                drawable = getDrawableFromFile("navibar", "navibar_background_land");
+            }else {
+                drawable = getDrawableFromFile("navibar", "navibar_background_port");
+            }
+            if(drawable != null) {
+                mView.setBackgroundDrawable(drawable);
+            }
+        }
+    }
+
     @Override
     public void transitionTo(int mode, boolean animate) {
         mRequestedMode = mode;
         super.transitionTo(mode, animate);
+        transitionJcrom(mode, animate, false);
     }
 
     @Override
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         super.onTransition(oldMode, newMode, animate);
         applyMode(newMode, animate, false /*force*/);
+        transitionJcrom(newMode, animate, true);
     }
 
     private void applyMode(int mode, boolean animate, boolean force) {

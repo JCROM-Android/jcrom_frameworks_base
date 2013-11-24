@@ -2743,6 +2743,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mRowHeight =  res.getDimensionPixelSize(R.dimen.notification_row_min_height);
 
         if (false) Log.v(TAG, "updateResources");
+
+        if ((null != mStatusBarView) && (null != mStatusBarView.getBarTransitions())) {
+            int mode = mStatusBarView.getBarTransitions().getMode();
+            mStatusBarView.getBarTransitions().refresh(mode, false);
+        }
     }
 
     //

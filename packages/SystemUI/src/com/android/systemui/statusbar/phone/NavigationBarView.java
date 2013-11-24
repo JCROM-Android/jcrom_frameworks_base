@@ -490,35 +490,10 @@ public class NavigationBarView extends LinearLayout {
 
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            {//port
-                FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
-                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_port");
-                if (drawable != null) {
-                    f.setBackgroundDrawable(drawable);
-                }else{
-                    //f.setBackgroundColor(0xff000000);
-                }
-            }
-            {//land
-                FrameLayout f = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
-                Drawable drawable = getDrawableFromFile("navibar", "navibar_background_land");
-                if (drawable != null) {
-                    f.setBackgroundDrawable(drawable);
-                }else{
-                    //f.setBackgroundColor(0xff000000);
-                }
-            }
-
             setupButtons(R.id.mymenu,      "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png");
             setupButtons(R.id.home,        "ic_sysbar_home.png",   "ic_sysbar_home_land.png");
             setupButtons(R.id.expand,      "ic_sysbar_expand.png", "ic_sysbar_expand_land.png");
             setButtonTheme();
-
-        }else{
-            //FrameLayout f_port = (FrameLayout) mRotatedViews[Surface.ROTATION_0];
-            //f_port.setBackgroundColor(0xff000000);
-            //FrameLayout f_land = (FrameLayout) mRotatedViews[Surface.ROTATION_90];
-            //f_land.setBackgroundColor(0xff000000);
         }
 
         watchForAccessibilityChanges();

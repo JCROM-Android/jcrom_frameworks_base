@@ -22,6 +22,10 @@ import android.animation.ObjectAnimator;
 import android.content.res.Resources;
 import android.view.View;
 
+import android.os.SystemProperties;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+
 import com.android.systemui.R;
 
 public final class PhoneStatusBarTransitions extends BarTransitions {
@@ -71,10 +75,44 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT);
     }
 
+    public void transitionJcrom(int mode, boolean animate, boolean transition) {
+        if(null == mView) {
+            return;
+        }
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if(!(forceHobby.equals("true"))) {
+            return;
+        }
+
+        if(mode == MODE_TRANSLUCENT) {
+            initBarTransitions(mView, R.drawable.status_background);
+            if(transition) {
+                transitionTo(mode, animate);
+            }
+        }else {
+            Drawable drawable = null;
+            if(requiresRotation()) {
+                drawable = getDrawableFromFile("statusbar", "status_bar_background_land");
+            }else {
+                drawable = getDrawableFromFile("statusbar", "status_bar_background");
+            }
+            if(drawable != null) {
+                mView.setBackgroundDrawable(drawable);
+            }
+        }
+    }
+
+    @Override
+    public void transitionTo(int mode, boolean animate) {
+        super.transitionTo(mode, animate);
+        transitionJcrom(mode, animate, false);
+    }
+
     @Override
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         super.onTransition(oldMode, newMode, animate);
         applyMode(newMode, animate);
+        transitionJcrom(newMode, animate, true);
     }
 
     private void applyMode(int mode, boolean animate) {

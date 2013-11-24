@@ -28,6 +28,15 @@ import android.util.Log;
 import android.view.View;
 import android.os.SystemProperties;
 
+import java.io.File;
+import android.content.Context;
+import android.widget.ImageView;
+import android.widget.FrameLayout;
+import android.os.Environment;
+import android.view.Display;
+import android.view.WindowManager;
+import android.view.Surface;
+
 import com.android.systemui.R;
 
 public class BarTransitions {
@@ -43,27 +52,27 @@ public class BarTransitions {
     public static final int LIGHTS_OUT_DURATION = 750;
     public static final int BACKGROUND_DURATION = 200;
 
-    private final String mTag;
-    private final View mView;
-    private final boolean mSupportsTransitions = ActivityManager.isHighEndGfx();
+    private String mTag;
+    private View mView;
+    private boolean mSupportsTransitions = ActivityManager.isHighEndGfx();
 
-    private final int mOpaque;
-    private final int mSemiTransparent;
+    private int mOpaque;
+    private int mSemiTransparent;
 
     private int mMode;
     private ValueAnimator mColorDrawableAnimator;
     private boolean mColorDrawableShowing;
 
-    private final ColorDrawable mColorDrawable;
-    private final TransitionDrawable mTransitionDrawable;
-    private final AnimatorUpdateListener mAnimatorListener = new AnimatorUpdateListener() {
+    private ColorDrawable mColorDrawable;
+    private TransitionDrawable mTransitionDrawable;
+    private AnimatorUpdateListener mAnimatorListener = new AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animator) {
             mColorDrawable.setColor((Integer) animator.getAnimatedValue());
         }
     };
 
-    public BarTransitions(View view, int gradientResourceId) {
+    public void initBarTransitions(View view, int gradientResourceId) {
         mTag = "BarTransitions." + view.getClass().getSimpleName();
         mView = view;
         final Resources res = mView.getContext().getResources();
@@ -93,8 +102,16 @@ public class BarTransitions {
         }
     }
 
+    public BarTransitions(View view, int gradientResourceId) {
+        initBarTransitions(view, gradientResourceId);
+    }
+
     public int getMode() {
         return mMode;
+    }
+
+    public void refresh(int mode, boolean animate) {
+        transitionTo(mode, animate);
     }
 
     public void transitionTo(int mode, boolean animate) {
@@ -169,4 +186,39 @@ public class BarTransitions {
         if (mode == MODE_LIGHTS_OUT) return "MODE_LIGHTS_OUT";
         throw new IllegalArgumentException("Unknown mode " + mode);
     }
+
+    protected Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
+    }
+
+    protected boolean requiresRotation() {
+        WindowManager wm = (WindowManager) mView.getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display dp = wm.getDefaultDisplay();
+
+        return dp.getRotation()==Surface.ROTATION_90 || dp.getRotation()==Surface.ROTATION_270;
+    }
+
 }
