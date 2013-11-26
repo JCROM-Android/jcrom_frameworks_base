@@ -2937,40 +2937,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         return extension;
     }
 
-/*
-    public void prepareStatusBarBackground() {
-        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
-        if (forceHobby.equals("true")) {
-            mStatusBarDrawable = getDrawableFromFile("statusbar", "status_bar_background");
-            mStatusBarLandDrawable = getDrawableFromFile("statusbar", "status_bar_background_land");
-        }
-    }
-
-    public void updateStatusBarBackground() {
-        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
-        FrameLayout f = (FrameLayout) mStatusBarView.findViewById(R.id.status_bar_background);
-        if (forceHobby.equals("true")) {
-            if (requiresRotation()) {
-                if(mStatusBarLandDrawable != null){
-                    f.setBackgroundDrawable(mStatusBarLandDrawable);
-                }else if(mStatusBarDrawable != null){
-                    f.setBackgroundDrawable(mStatusBarDrawable);
-                }else{
-	            f.setBackgroundColor(0xff000000);
-                }
-            }else{
-                if(mStatusBarDrawable != null){
-                    f.setBackgroundDrawable(mStatusBarDrawable);
-                }else{
-	            f.setBackgroundColor(0xff000000);
-                }
-            }
-        }else{
-            f.setBackgroundColor(0xff000000);
-        }
-    }
-*/
-
     public void prepareNotificationBackground() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
