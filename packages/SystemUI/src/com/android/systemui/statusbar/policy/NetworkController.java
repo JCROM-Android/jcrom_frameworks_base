@@ -145,9 +145,11 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     public static final String THEME_DIRECTORY = "/theme/notification/";
     public static final String CONFIGURATION_FILE = "notification.conf";
     public static final String EMERGENCYLABEL_COLOR = "color.emergency";
+    public static final String CARRIER_COLOR = "color.carrier";
     private String mFilePath;
     private Properties prop;
-    private String mColor = null;
+    private String mColorEmergency = null;
+    private String mColorCarrier = null;
 
     // our ui
     Context mContext;
@@ -259,7 +261,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         mLastLocale = mContext.getResources().getConfiguration().locale;
 
         mFilePath = Environment.getDataDirectory() + THEME_DIRECTORY + CONFIGURATION_FILE;
-        loadConf(mFilePath, EMERGENCYLABEL_COLOR);
+        mColorEmergency = loadConf(mFilePath, EMERGENCYLABEL_COLOR);
+        mColorCarrier = loadConf(mFilePath, CARRIER_COLOR);
     }
 
     public boolean hasMobileDataFeature() {
@@ -1237,6 +1240,10 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         N = mMobileLabelViews.size();
         for (int i=0; i<N; i++) {
             TextView v = mMobileLabelViews.get(i);
+            if(null != mColorCarrier) {
+                int color = (int)(Long.parseLong(mColorCarrier, 16));
+                v.setTextColor(color);
+            }
             v.setText(mobileLabel);
             if ("".equals(mobileLabel)) {
                 v.setVisibility(View.GONE);
@@ -1252,8 +1259,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             if (!emergencyOnly) {
                 v.setVisibility(View.GONE);
             } else {
-                if(null != mColor) {
-                    int color = (int)(Long.parseLong(mColor, 16));
+                if(null != mColorEmergency) {
+                    int color = (int)(Long.parseLong(mColorEmergency, 16));
                     v.setTextColor(color);
                 }
                 v.setText(mobileLabel); // comes from the telephony stack
@@ -1486,14 +1493,13 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         }
     }
 
-    private void loadConf(String filePath, String propertyName) {
+    private String loadConf(String filePath, String propertyName) {
         prop = new Properties();
         try {
             prop.load(new FileInputStream(filePath));
-            mColor = prop.getProperty(propertyName);
+            return prop.getProperty(propertyName);
         } catch (IOException e) {
-            mColor = null;
-            return;
+            return null;
         }
     }
 
