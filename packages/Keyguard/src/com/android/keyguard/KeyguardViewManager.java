@@ -150,7 +150,8 @@ public class KeyguardViewManager {
 
     private boolean shouldEnableTranslucentDecor() {
         Resources res = mContext.getResources();
-        return res.getBoolean(R.bool.config_enableLockScreenTranslucentDecor);
+        return SystemProperties.getBoolean("persist.sys.full.lockscreen",
+            res.getBoolean(R.bool.config_enableLockScreenTranslucentDecor));
     }
 
     class ViewManagerHost extends FrameLayout {
