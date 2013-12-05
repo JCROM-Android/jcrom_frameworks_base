@@ -841,11 +841,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private View.OnClickListener mExpandClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-        		if (mExpandedVisible) {
-					mNavigationBarView.collapse();
-        		} else {
-					mNavigationBarView.expand();
-        		}
+            if (mExpandedVisible) {
+                animateCollapsePanels();
+            } else {
+                animateExpandNotificationsPanel();
+            }
         }
     };
 

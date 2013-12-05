@@ -185,17 +185,4 @@ public final class NavigationBarTransitions extends BarTransitions {
         }
     };
 
-    public void expand() {
-		try {
-	        mBarService.expandNotificationsPanel();
-        } catch (android.os.RemoteException ex) {
-        }
-    }
-
-    public void collapse() {
-		try {
-			mBarService.collapsePanels();
-        } catch (android.os.RemoteException ex) {
-        }
-    }
 }

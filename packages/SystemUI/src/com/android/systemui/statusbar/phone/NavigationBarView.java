@@ -255,14 +255,6 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.expand);
     }
 
-    public void expand() {
-		mBarTransitions.expand();
-    }
-
-    public void collapse() {
-		mBarTransitions.collapse();
-    }
-
     // for when home is disabled, but search isn't
     public View getSearchLight() {
         return mCurrentView.findViewById(R.id.search_light);
