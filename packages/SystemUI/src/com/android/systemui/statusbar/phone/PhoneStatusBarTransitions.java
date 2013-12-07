@@ -24,6 +24,7 @@ import android.view.View;
 
 import android.os.SystemProperties;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 
 import com.android.systemui.R;
@@ -85,7 +86,9 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
 
         if(mode == MODE_TRANSLUCENT) {
-            initBarTransitions(mView, R.drawable.status_background);
+            Resources res = mView.getContext().getResources();
+            ColorDrawable transColorDrawable = new ColorDrawable(res.getColor(R.color.system_bar_background_transparent));
+            mView.setBackgroundDrawable((Drawable)transColorDrawable); 
             if(transition) {
                 transitionTo(mode, animate);
             }

@@ -71,6 +71,9 @@
     <!-- Keyguard -->
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
 
+    <!-- Wifi Display -->
+    <uses-permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY" />
+
     <!-- QSM -->
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.flash" />
