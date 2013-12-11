@@ -531,10 +531,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mHasSettingsPanel) {
                 if (mStatusBarView.hasFullWidthNotifications()) {
                     // the settings panel is hiding behind this button
+                    mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
                     if (forceHobby.equals("true")) {
                         setQuickSettingsImage("ic_notify_quicksettings.png");
-                    } else {
-                        mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
                     }
                     mSettingsButton.setVisibility(View.VISIBLE);
                 } else {
