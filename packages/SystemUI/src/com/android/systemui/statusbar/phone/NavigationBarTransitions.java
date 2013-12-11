@@ -126,7 +126,11 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     private float alphaForMode(int mode) {
-        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
+        boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
+        String alphaNavikey = SystemProperties.get("persist.sys.alpha.navikey");
+        if((alphaNavikey.equals("true"))) {
+            isOpaque = false;
+        }
         return isOpaque ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
     }
 
