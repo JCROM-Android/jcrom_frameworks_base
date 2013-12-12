@@ -531,10 +531,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mHasSettingsPanel) {
                 if (mStatusBarView.hasFullWidthNotifications()) {
                     // the settings panel is hiding behind this button
+                    mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
                     if (forceHobby.equals("true")) {
                         setQuickSettingsImage("ic_notify_quicksettings.png");
-                    } else {
-                        mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
                     }
                     mSettingsButton.setVisibility(View.VISIBLE);
                 } else {
@@ -2409,12 +2408,30 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mNotificationPanel.getLayoutParams();
         lp.gravity = mNotificationPanelGravity;
         lp.setMarginStart(mNotificationPanelMarginPx);
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        Resources res = mContext.getResources();
+        float density = res.getDisplayMetrics().density;
+        if (forceHobby.equals("true")) {
+            if(mNotificationPanelMarginPx != 0 && mNotificationTrackingDrawable != null){ // for Phone UI(Large)
+                int margin = (int)(16 * density + 0.5f);
+                lp.width = (int) res.getDimension(R.dimen.notification_panel_width) - 2 * margin;
+                lp.setMarginStart(mNotificationPanelMarginPx + margin);
+            }
+        }
         mNotificationPanel.setLayoutParams(lp);
 
         if (mSettingsPanel != null) {
             lp = (FrameLayout.LayoutParams) mSettingsPanel.getLayoutParams();
             lp.gravity = mSettingsPanelGravity;
             lp.setMarginEnd(mNotificationPanelMarginPx);
+            if (forceHobby.equals("true")) {
+                if(mNotificationPanelMarginPx != 0 && mQuickSettingDrawable != null){ // for Phone UI(Large)
+                    int margin = (int)(16 * density + 0.5f);
+                    lp.width = (int) res.getDimension(R.dimen.notification_panel_width) - 2 * margin;
+                    lp.setMarginEnd(mNotificationPanelMarginPx + margin);
+                }
+            }
             mSettingsPanel.setLayoutParams(lp);
         }
 
@@ -2975,10 +2992,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     public Drawable getLargeNotificationBackground(String filename){
 
-        Drawable d_land = getDrawableFromFile("notification", filename);
+        Drawable d = getDrawableFromFile("notification", filename);
 
-        if(d_land != null){
-            Bitmap bmp_org = ((BitmapDrawable)d_land).getBitmap();
+        if(d != null){
+
+            Bitmap bmp_org = ((BitmapDrawable)d).getBitmap();
 
             int w_org = bmp_org.getWidth();
             int h_org = bmp_org.getHeight();
@@ -2988,13 +3006,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             float density = res.getDisplayMetrics().density;
             int margin = (int)(16 * density + 0.5f);
 
-            int w_large = (int) res.getDimension(R.dimen.notification_panel_width);
-            int w_target = w_large - 2*margin;
+            int w_large = (int) res.getDimension(R.dimen.notification_panel_width) - 2 * margin;
+            int w_target = w_large;
 
             int h_target = (int) (h_org*w_target*density/w_org + 0.5f);
             int h_large =  h_target + (int)((margin+1)*density + 0.5f);
 
-            Rect r_target = new Rect(margin, 0, margin + w_target, h_target);
+            Rect r_target = new Rect(0, 0, w_target, h_target);
 
             Bitmap bmp_large = Bitmap.createBitmap(w_large, h_large, Bitmap.Config.ARGB_8888);
             Canvas c = new Canvas(bmp_large);

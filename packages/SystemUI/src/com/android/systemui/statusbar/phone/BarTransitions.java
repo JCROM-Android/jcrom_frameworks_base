@@ -251,11 +251,15 @@ public class BarTransitions {
         builder.append(MY_FILE_NAME);
         String filePath = builder.toString();
         String extension = checkThemeFile(filePath);
-        return Drawable.createFromPath(filePath + extension);
+        if(extension != null) {
+            return Drawable.createFromPath(filePath + extension);
+        }else {
+            return null;
+        }
     }
 
     private String checkThemeFile(String filename) {
-        String extension = ".png";
+        String extension = null;
         File file = null;
 
         file = new File(filename + ".png");
