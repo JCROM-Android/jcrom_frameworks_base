@@ -179,7 +179,7 @@ public class SearchPanelView extends FrameLayout implements
             String filePath = builder.toString();
 
             Drawable drawable = Drawable.createFromPath(filePath);
-            if(drawable != null) {
+            if(drawable != null && mGlowImage != null) {
                 mGlowImage.setImageDrawable(drawable);
             }
         }
