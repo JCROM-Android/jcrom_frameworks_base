@@ -2430,6 +2430,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     int margin = (int)(16 * density + 0.5f);
                     lp.width = (int) res.getDimension(R.dimen.notification_panel_width) - 2 * margin;
                     lp.setMarginEnd(mNotificationPanelMarginPx + margin);
+                    mSettingsPanel.setPadding(0, mSettingsPanel.getPaddingTop(), 0, mSettingsPanel.getPaddingBottom());
                 }
             }
             mSettingsPanel.setLayoutParams(lp);
