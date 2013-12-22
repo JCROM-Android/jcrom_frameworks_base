@@ -37,6 +37,15 @@ import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.view.View;
 
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
+import android.os.Environment;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
+import android.util.Log;
+import android.graphics.Matrix; 
+import android.graphics.Color;
+
 public class BatteryMeterView extends View implements DemoMode {
     public static final String TAG = BatteryMeterView.class.getSimpleName();
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
@@ -51,10 +60,18 @@ public class BatteryMeterView extends View implements DemoMode {
     public static final float SUBPIXEL = 0.4f;  // inset rects for softer edges
 
     private static final String BATTERY_PERCENTAGE_PROPERTY = "persist.sys.battery.percentage";
+    private static final String SELECT_BATTERY_PROPERTY = "persist.sys.battery.select";
+
+    private static final int SELECT_BATTERY_NORMAL = 0;
+    private static final int SELECT_BATTERY_PERCENTAGE = 1;
+    private static final int SELECT_BATTERY_THEME = 2;
+
+    private LevelListDrawable mBatteryImages = null;
+    private LevelListDrawable mPluggedImages = null;
 
     int[] mColors;
 
-    boolean mShowPercent = true;
+    int mSelectBattery = SELECT_BATTERY_NORMAL;
     Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     int mButtonHeight;
     private float mTextHeight, mWarningTextHeight;
@@ -190,7 +207,7 @@ public class BatteryMeterView extends View implements DemoMode {
         }
         levels.recycle();
         colors.recycle();
-        mShowPercent = ENABLE_PERCENT && SystemProperties.getBoolean(BATTERY_PERCENTAGE_PROPERTY, false);
+        mSelectBattery = SystemProperties.getInt(SELECT_BATTERY_PROPERTY, SELECT_BATTERY_NORMAL);
 
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
 
@@ -225,6 +242,34 @@ public class BatteryMeterView extends View implements DemoMode {
         mBoltPaint.setColor(res.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mBatteryImages = getBatteryImages("battery_%d.png");
+            mPluggedImages = getBatteryImages("battery_plugged_%d.png");
+        }
+    }
+
+    private LevelListDrawable getBatteryImages(String filename) {
+        LevelListDrawable images = new LevelListDrawable();
+        String format = Environment.getDataDirectory().toString() + "/theme/statusbar/" + filename;
+        int minlevel = 0;
+        Drawable maxd = null;
+
+        for (int level = 0; level <= 100; level++) {
+            String path = String.format(format, level);
+            Drawable d = Drawable.createFromPath(path);
+            if (d != null) {
+                images.addLevel(minlevel, level, d);
+                minlevel = level + 1;
+                maxd = d;
+            }
+        }
+
+        if ((maxd != null) && (minlevel <= 100)) {
+            images.addLevel(minlevel, 100, maxd);
+        }
+        return (maxd != null) ? images : null;
     }
 
     private static float[] loadBoltPoints(Resources res) {
@@ -319,7 +364,17 @@ public class BatteryMeterView extends View implements DemoMode {
         c.drawRect(mFrame, mBatteryPaint);
         c.restore();
 
-        if (tracker.plugged) {
+        LevelListDrawable images = tracker.plugged ? mPluggedImages : mBatteryImages;
+
+        if ((mSelectBattery == SELECT_BATTERY_THEME) && (null != images)) {
+            c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            images.setLevel(level);
+            Bitmap bitmap = ((BitmapDrawable) images.getCurrent()).getBitmap();
+            BitmapDrawable drawable = new BitmapDrawable(bitmap);
+            drawable.setBounds(0, 0, drawable.getBitmap().getWidth(),drawable.getBitmap().getHeight());
+            drawable.draw(c);
+            
+        } else if (tracker.plugged) {
             // draw the bolt
             final float bl = mFrame.left + mFrame.width() / 4.5f;
             final float bt = mFrame.top + mFrame.height() / 6f;
@@ -346,7 +401,7 @@ public class BatteryMeterView extends View implements DemoMode {
             final float x = mWidth * 0.5f;
             final float y = (mHeight + mWarningTextHeight) * 0.48f;
             c.drawText(mWarningString, x, y, mWarningTextPaint);
-        } else if (mShowPercent && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
+        } else if ((mSelectBattery == SELECT_BATTERY_PERCENTAGE) && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
                             : (tracker.level == 100 ? 0.38f : 0.5f)));
