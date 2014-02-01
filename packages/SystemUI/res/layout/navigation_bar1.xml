@@ -48,15 +48,6 @@
                 />
 
             <!-- navigation controls -->
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="@dimen/navigation_key_width"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_back"
-                systemui:keyCode="4"
-                android:layout_weight="0"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                android:contentDescription="@string/accessibility_back"
-                />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/mymenu"
                 android:layout_width="@dimen/navigation_key_width"
                 android:layout_height="match_parent"
@@ -76,12 +67,14 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_home"
                 />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/expand"
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_width="@dimen/navigation_key_width"
                 android:layout_height="match_parent"
-				android:src="@drawable/ic_sysbar_expand"
+                android:src="@drawable/ic_sysbar_back"
+                systemui:keyCode="4"
                 android:layout_weight="0"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                android:contentDescription="@string/accessibility_back"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                 android:layout_width="@dimen/navigation_key_width"
@@ -91,7 +84,13 @@
                 systemui:glowBackground="@drawable/ic_sysbar_highlight"
                 android:contentDescription="@string/accessibility_recent"
                 />
-
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/expand"
+                android:layout_width="@dimen/navigation_key_width"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_expand"
+                android:layout_weight="0"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                />
             <Space 
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -217,6 +216,13 @@
                 android:layout_weight="1"
                 />
             <!-- navigation controls -->
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/expand"
+                android:layout_height="72dp"
+                android:layout_width="match_parent"
+                android:src="@drawable/ic_sysbar_expand_land"
+                android:layout_weight="0"
+                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
+                />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                 android:layout_height="72dp"
                 android:layout_width="match_parent"
@@ -225,11 +231,13 @@
                 android:contentDescription="@string/accessibility_recent"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/expand"
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_height="72dp"
                 android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_expand_land"
+                android:src="@drawable/ic_sysbar_back_land"
+                systemui:keyCode="4"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
@@ -249,15 +257,6 @@
                 systemui:keyCode="82"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_menu"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
-                />
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_height="72dp"
-                android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_back_land"
-                systemui:keyCode="4"
-                android:layout_weight="0"
-                android:contentDescription="@string/accessibility_back"
                 systemui:glowBackground="@drawable/ic_sysbar_highlight_land"
                 />
             <Space 

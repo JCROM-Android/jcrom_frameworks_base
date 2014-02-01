@@ -472,9 +472,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                mNavigationBarView =
-                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
+                int keyLayout = SystemProperties.getInt("persist.sys.keylayout.select", 0);
+                switch (keyLayout) {
+                    case 0:
+                        mNavigationBarView = (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                        break;
+                    case 1:
+                        mNavigationBarView = (NavigationBarView) View.inflate(context, R.layout.navigation_bar1, null);
+                        break;
+                    case 2:
+                        mNavigationBarView = (NavigationBarView) View.inflate(context, R.layout.navigation_bar2, null);
+                        break;
+                    case 3:
+                        mNavigationBarView = (NavigationBarView) View.inflate(context, R.layout.navigation_bar3, null);
+                        break;
+                    default:
+                        mNavigationBarView = (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                        break;
+                }
+                if (mNavigationBarView == null) {
+                    mNavigationBarView = (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                }
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
                 mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
