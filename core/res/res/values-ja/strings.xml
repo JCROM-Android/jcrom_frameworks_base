@@ -1671,4 +1671,6 @@
     <string name="reboot_system" product="default" msgid="4266614107412865098">"端末の再起動"</string>
     <string name="reboot_progress" msgid="4266614107412865108">再起動中\u2026</string>
     <string name="global_action_reboot" msgid="4266614107412865118">再起動</string>
+    <string name="install_dialog_title">"アプリケーションインストールエラー"</string>
+    <string name="install_dialog_summary">"このアプリケーションのインストールは無効になっています。"</string>
 </resources>

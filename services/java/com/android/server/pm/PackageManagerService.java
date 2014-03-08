@@ -49,6 +49,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AlertDialog;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
@@ -155,6 +156,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
@@ -4128,8 +4130,42 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
+    private boolean isBlacklisted(ArrayList<String> loadList, String packageName) {
+        if(packageName == null || loadList == null) return false;
+        for(int i = 0; i < loadList.size(); i++){
+            if(packageName.equals(loadList.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, long currentTime, UserHandle user) {
+        
+        String blacklist = mSystemReady? android.provider.Settings.Secure.getString(mContext.getContentResolver(),android.provider.Settings.Secure.INSTALL_BLACK_LIST) : "";
+        if (blacklist == null) blacklist = "";
+        ArrayList<String> loadList = new ArrayList<String>();
+            StringTokenizer st = new StringTokenizer(blacklist, ",");
+            while (st.hasMoreTokens()) {
+                loadList.add(st.nextToken());
+            }
+            if (isBlacklisted(loadList, pkg.packageName)) {
+                final AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+                b.setCancelable(true);
+                b.setTitle(com.android.internal.R.string.install_dialog_title);
+                b.setMessage(com.android.internal.R.string.install_dialog_summary);
+                b.setPositiveButton(android.R.string.ok, null);
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        AlertDialog d = b.create();
+                        d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                        d.show();
+                    }
+                });
+                return null;
+                
+            }
         File scanFile = new File(pkg.mScanPath);
         if (scanFile == null || pkg.applicationInfo.sourceDir == null ||
                 pkg.applicationInfo.publicSourceDir == null) {

@@ -4396,6 +4396,11 @@ public final class Settings {
         public static final String PAYMENT_SERVICE_SEARCH_URI = "payment_service_search_uri";
 
         /**
+         * @hide
+         */
+        public static final String INSTALL_BLACK_LIST = "install_black_list";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
