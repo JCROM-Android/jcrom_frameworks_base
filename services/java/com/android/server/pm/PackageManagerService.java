@@ -4143,9 +4143,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, long currentTime, UserHandle user) {
         
-        String blacklist = mSystemReady? android.provider.Settings.Secure.getString(mContext.getContentResolver(),android.provider.Settings.Secure.INSTALL_BLACK_LIST) : "";
-        if (blacklist == null) blacklist = "";
-        ArrayList<String> loadList = new ArrayList<String>();
+        if (SystemProperties.getBoolean("persist.sys.blacklist", false)) {
+            String blacklist = mSystemReady? android.provider.Settings.Secure.getString(mContext.getContentResolver(),android.provider.Settings.Secure.INSTALL_BLACK_LIST) : "";
+            if (blacklist == null) blacklist = "";
+            ArrayList<String> loadList = new ArrayList<String>();
             StringTokenizer st = new StringTokenizer(blacklist, ",");
             while (st.hasMoreTokens()) {
                 loadList.add(st.nextToken());
@@ -4166,6 +4167,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
                 
             }
+        }
+
         File scanFile = new File(pkg.mScanPath);
         if (scanFile == null || pkg.applicationInfo.sourceDir == null ||
                 pkg.applicationInfo.publicSourceDir == null) {
