@@ -63,6 +63,10 @@ public class RecentsActivity extends Activity {
                 if (mRecentsPanel != null) {
                     mRecentsPanel.onWindowAnimationStart();
                 }
+            } else if ((intent.getAction()).equals(Intent.ACTION_JCROM_THEME_CHANGE)) {
+                if (mRecentsPanel != null) {
+                    mRecentsPanel.themeLoad();
+                }
             }
         }
     };
@@ -198,6 +202,7 @@ public class RecentsActivity extends Activity {
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(CLOSE_RECENTS_INTENT);
         mIntentFilter.addAction(WINDOW_ANIMATION_START_INTENT);
+        mIntentFilter.addAction(Intent.ACTION_JCROM_THEME_CHANGE);
         registerReceiver(mIntentReceiver, mIntentFilter);
         super.onCreate(savedInstanceState);
     }

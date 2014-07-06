@@ -27,6 +27,7 @@ import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.TextView;
 import android.graphics.Color;
 import android.os.Environment;
@@ -64,6 +65,7 @@ public class Clock extends TextView implements DemoMode {
     public static final String THEME_DIRECTORY = "/theme/notification/";
     public static final String CONFIGURATION_FILE = "notification.conf";
     public static final String CLOCK_COLOR = "color.clock";
+    public static final String DEFAULT_TEXT_COLOR = "FFFFFFFF";
     private final String mFilePath;
     private Properties prop;
     private String mColor = null;
@@ -88,8 +90,18 @@ public class Clock extends TextView implements DemoMode {
             prop.load(new FileInputStream(filePath));
             mColor = prop.getProperty(propertyName);
         } catch (IOException e) {
-            mColor = null;
-            return;
+            mColor = DEFAULT_TEXT_COLOR;
+        }
+
+        IntentFilter myfilter = new IntentFilter();
+        myfilter.addAction(Intent.ACTION_JCROM_THEME_CHANGE);
+        getContext().registerReceiver(new JCReceiver(), myfilter);
+    }
+
+    private final class JCReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context content, Intent intent) {
+            themeLoad();
         }
     }
 
@@ -255,5 +267,10 @@ public class Clock extends TextView implements DemoMode {
             setText(getSmallTime());
         }
     }
-}
 
+    public void themeLoad() {
+        loadConf(mFilePath, CLOCK_COLOR);
+        updateClock();
+    }
+
+}

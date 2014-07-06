@@ -551,8 +551,9 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        intentFilter.addAction(Intent.ACTION_JCROM_THEME_CHANGE);
+
         // TODO merge orientation and rotation
         mMonitorOrientation = SystemProperties.getBoolean("ro.audio.monitorOrientation", false);
         if (mMonitorOrientation) {
@@ -4265,6 +4266,9 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+            } else if (action.equals(Intent.ACTION_JCROM_THEME_CHANGE)) {
+                unloadSoundEffects();
+                loadSoundEffects();
             }
         }
     }

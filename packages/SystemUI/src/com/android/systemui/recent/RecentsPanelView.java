@@ -64,6 +64,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.os.SystemProperties;
 
@@ -293,6 +294,27 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentItemLayoutId = a.getResourceId(R.styleable.RecentsPanelView_recentItemLayout, 0);
         mRecentTasksLoader = RecentTasksLoader.getInstance(context);
         a.recycle();
+    }
+
+    public void themeLoad() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        Drawable drawable = null;
+        if (forceHobby.equals("true")) {
+            mMyFrame = true;
+            String MY_FRAME_FILE = "my_frame.png";
+            StringBuilder builder = new StringBuilder();
+            builder.append(Environment.getDataDirectory().toString() + "/theme/frame/");
+            builder.append(File.separator);
+            builder.append(MY_FRAME_FILE);
+            String filePath = builder.toString();
+            drawable = Drawable.createFromPath(filePath);
+            if( drawable != null ) {
+                mMyFrameBmp = ((BitmapDrawable) drawable).getBitmap();
+            }
+        }
+        if (drawable == null) {
+            mMyFrameBmp = null;
+        }   
     }
 
     public int numItemsInOneScreenful() {

@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import android.os.SystemProperties;
 import java.io.File;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.widget.ImageView;
 import android.os.Environment;
 
@@ -188,6 +189,26 @@ public class SearchPanelView extends FrameLayout implements
         // TODO: fetch views
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
+    }
+
+    public void themeLoad() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        ImageView mGlowImage = (ImageView)findViewById(R.id.search_panel_image);
+        Drawable drawable = null;
+
+        if(forceHobby.equals("true")) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(Environment.getDataDirectory().toString() + "/theme/navibar/");
+            builder.append("search_panel_image.png");
+            String filePath = builder.toString();
+            drawable = Drawable.createFromPath(filePath);
+        }
+        if(drawable == null) {
+            drawable = new ColorDrawable(getContext().getResources().getColor(R.color.search_panel_background_transparent));
+        }
+        if((drawable != null) && (mGlowImage != null)) {
+            mGlowImage.setImageDrawable(drawable);
+        }
     }
 
     private void maybeSwapSearchIcon() {

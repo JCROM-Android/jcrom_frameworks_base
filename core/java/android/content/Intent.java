@@ -2696,6 +2696,11 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
 
+    /**
+     * JCROM
+     */
+    public static final String ACTION_JCROM_THEME_CHANGE = "android.intent.action.JCROM_THEME_CHANGE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).

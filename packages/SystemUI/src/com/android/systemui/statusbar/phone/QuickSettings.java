@@ -183,6 +183,8 @@ class QuickSettings {
     public static final String RINGER_COLOR = "color.ringer";
     public static final String TORCH_COLOR = "color.torch";
 
+    public static final String DEFAULT_TEXT_COLOR = "FFFFFFFF";
+
     private HashMap<String,String> mLabelListColor = new HashMap<String,String>();
     private String mFilePath;
     private Properties prop;
@@ -550,7 +552,7 @@ class QuickSettings {
                         RSSIState rssiState = (RSSIState) state;
                         ImageView iv = (ImageView) view.findViewById(R.id.rssi_image);
                         ImageView iov = (ImageView) view.findViewById(R.id.rssi_overlay_image);
-                        TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
+                        TextView tv = (TextView) view.findViewById(R.id.text);
                         // Force refresh
                         iv.setImageDrawable(null);
                         iv.setImageResource(rssiState.signalIconId);
@@ -753,7 +755,7 @@ class QuickSettings {
             mModel.addRingerTile(ringerTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
-                    TextView tv = (TextView) view.findViewById(R.id.ringer_textview);
+                    TextView tv = (TextView) view.findViewById(R.id.text);
                     ImageView iv = (ImageView) view.findViewById(R.id.ringer_overlay_image);
 
                     if(null != mLabelListColor.get(RINGER_COLOR)) {
@@ -810,7 +812,7 @@ class QuickSettings {
                             mContext.getContentResolver(),
                             LocationManager.GPS_PROVIDER);
 
-                    TextView tv = (TextView) view.findViewById(R.id.location_textview);
+                    TextView tv = (TextView) view.findViewById(R.id.text);
                     ImageView iv = (ImageView) view.findViewById(R.id.location_image);
                     if(null != mLabelListColor.get(LOCATION_COLOR)) {
                         int color = (int)(Long.parseLong(mLabelListColor.get(LOCATION_COLOR), 16));
@@ -851,7 +853,7 @@ class QuickSettings {
             mModel.addWifiApTile(WifiApTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
-                    TextView tv = (TextView) view.findViewById(R.id.wifiap_textview);
+                    TextView tv = (TextView) view.findViewById(R.id.text);
                     ImageView iv = (ImageView) view.findViewById(R.id.wifiap_image);
 
                     final WifiManager wifiManager = (WifiManager) mContext
@@ -890,7 +892,7 @@ class QuickSettings {
             mModel.addTorchTile(torchTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
-                    TextView tv = (TextView) view.findViewById(R.id.torch_textview);
+                    TextView tv = (TextView) view.findViewById(R.id.text);
                     ImageView iv = (ImageView) view.findViewById(R.id.torch_image);
                     if(null != mLabelListColor.get(TORCH_COLOR)) {
                         int color = (int)(Long.parseLong(mLabelListColor.get(TORCH_COLOR), 16));
@@ -922,7 +924,7 @@ class QuickSettings {
             mModel.addScreenTile(screenTile, new QuickSettingsModel.RefreshCallback() {
                 @Override
                 public void refreshView(QuickSettingsTileView view, State state) {
-                    TextView tv = (TextView) view.findViewById(R.id.screen_tileview);
+                    TextView tv = (TextView) view.findViewById(R.id.text);
                     if(null != mLabelListColor.get(SCREEN_COLOR)) {
                         int color = (int)(Long.parseLong(mLabelListColor.get(SCREEN_COLOR), 16));
                         tv.setTextColor(color);
@@ -1096,7 +1098,7 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView view, State state) {
                 UserState us = (UserState) state;
                 ImageView iv = (ImageView) view.findViewById(R.id.user_imageview);
-                TextView tv = (TextView) view.findViewById(R.id.user_textview);
+                TextView tv = (TextView) view.findViewById(R.id.text);
                 if(null != mLabelListColor.get(USER_COLOR)) {
                     int color = (int)(Long.parseLong(mLabelListColor.get(USER_COLOR), 16));
                     tv.setTextColor(color);
@@ -1470,7 +1472,47 @@ class QuickSettings {
             prop.load(new FileInputStream(filePath));
             return prop.getProperty(propertyName);
         } catch (IOException e) {
-            return null;
+            return DEFAULT_TEXT_COLOR;
         }
+    }
+
+    public void themeLoad() {
+
+        mLabelListColor = null;
+        mLabelListColor = new HashMap<String,String>();
+
+        mLabelListColor.put(USER_COLOR, loadConf(mFilePath, USER_COLOR));
+        mLabelListColor.put(SETTINGS_COLOR, loadConf(mFilePath, SETTINGS_COLOR));
+        mLabelListColor.put(BRIGHTNESS_COLOR, loadConf(mFilePath, BRIGHTNESS_COLOR));
+        mLabelListColor.put(BATTERY_COLOR, loadConf(mFilePath, BATTERY_COLOR));
+        mLabelListColor.put(ROTATION_COLOR, loadConf(mFilePath, ROTATION_COLOR));
+        mLabelListColor.put(AIRPLANE_COLOR, loadConf(mFilePath, AIRPLANE_COLOR));
+        mLabelListColor.put(WIFI_COLOR, loadConf(mFilePath, WIFI_COLOR));
+        mLabelListColor.put(WIFI_AP_COLOR, loadConf(mFilePath, WIFI_AP_COLOR));
+        mLabelListColor.put(RSSI_COLOR, loadConf(mFilePath, RSSI_COLOR));
+        mLabelListColor.put(BLUETOOTH_COLOR, loadConf(mFilePath, BLUETOOTH_COLOR));
+        mLabelListColor.put(SCREEN_COLOR, loadConf(mFilePath, SCREEN_COLOR));
+        mLabelListColor.put(LOCATION_COLOR, loadConf(mFilePath, LOCATION_COLOR));
+        mLabelListColor.put(RINGER_COLOR, loadConf(mFilePath, RINGER_COLOR));
+        mLabelListColor.put(TORCH_COLOR, loadConf(mFilePath, TORCH_COLOR));
+
+        int color = (int)(Long.parseLong(mLabelListColor.get(SETTINGS_COLOR), 16));
+        for (int i=0; i<mContainerView.getChildCount(); i++) {
+
+            if (mContainerView.getChildAt(i) != null) {
+                if (mContainerView.getChildAt(i) instanceof QuickSettingsBasicTile) {
+                    QuickSettingsBasicTile view = (QuickSettingsBasicTile)(mContainerView.getChildAt(i));
+                    view.setTextColor(color);
+                } else {
+                    QuickSettingsTileView view = (QuickSettingsTileView)(mContainerView.getChildAt(i));
+                    TextView tv = (TextView)view.findViewById(R.id.text);
+                    if (tv != null) {
+                        tv.setTextColor(color);
+                    }
+                }
+            }
+
+        }
+
     }
 }

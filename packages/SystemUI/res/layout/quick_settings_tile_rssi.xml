@@ -60,7 +60,7 @@
             />
     <TextView
         style="@style/TextAppearance.QuickSettings.TileView"
-        android:id="@+id/rssi_textview"
+        android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"

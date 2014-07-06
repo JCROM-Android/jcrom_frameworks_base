@@ -113,7 +113,9 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DateView;
+import com.android.systemui.statusbar.policy.DefaultClock;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -250,6 +252,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     // the date view
     DateView mDateView;
+
+    Clock mClock;
 
     // for heads up notifications
     private HeadsUpNotificationView mHeadsUpNotificationView;
@@ -389,6 +393,102 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.Global.getUriFor(SETTING_HEADS_UP), true,
                     mHeadsUpObserver);
         }
+
+        IntentFilter myfilter = new IntentFilter();
+        myfilter.addAction(Intent.ACTION_JCROM_THEME_CHANGE);
+        mContext.registerReceiver(new JCReceiver(), myfilter);
+    }
+
+    private final class JCReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context content, Intent intent) {
+            mNavigationBarView.themeLoad();
+            mNavigationBarView.initTheme();
+            mSearchPanelView.themeLoad();
+            mNetworkController.themeLoad();
+            mQS.themeLoad();
+            mDateView.themeLoad();
+            mStatusBarView.initTheme();
+            mNotificationPanel.themeLoad();
+            initNotifications();
+        }
+    }
+
+
+    public void initNotifications() {
+        themeLoadNotifications();
+
+        int N = mNotificationData.size();
+        final boolean provisioned = isDeviceProvisioned();
+        for (int i=0; i<N; i++) {
+            Entry ent = mNotificationData.get(N-i-1);
+            if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
+            if (!notificationIsForCurrentUser(ent.notification)) continue;
+            removeNotification(ent.key);
+        }
+    }
+
+    public void reloadNotifications() {
+        int N = mNotificationData.size();
+        final boolean provisioned = isDeviceProvisioned();
+        for (int i=0; i<N; i++) {
+            Entry ent = mNotificationData.get(N-i-1);
+            if (!(provisioned || showNotificationEvenIfUnprovisioned(ent.notification))) continue;
+            if (!notificationIsForCurrentUser(ent.notification)) continue;
+            registerLevelListDrawable(ent.content);
+        }
+    }
+
+    public void themeLoadNotifications() {
+        String MY_NOTIFICATION_FORMAT = "notification_item_background_%02d_%s";
+        String MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL = "normal";
+        String MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED = "pressed";
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/notification/");
+        builder.append(File.separator);
+        builder.append(MY_NOTIFICATION_FORMAT);
+        String filePathFormat = builder.toString();
+
+        int i = 0;
+        while (i < 100) {
+            String pathPressed = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_PRESSED);
+            String pathNormal = String.format(filePathFormat, i, MY_NOTIFICATION_FORMAT_SUFFIX_NORMAL);
+
+            String extension = checkThemeFile(pathPressed);
+            Drawable drawablePressed = Drawable.createFromPath(pathPressed + extension);
+            extension = checkThemeFile(pathNormal);
+            Drawable drawableNormal = Drawable.createFromPath(pathNormal + extension);
+            if ((null == drawablePressed) || (null == drawableNormal)) {
+                break;
+            } else {
+                i++;
+            }
+        }
+        mNotificationPictureNum = i;
+        if (mNotificationPictureNum > 0 ) {
+            mNotificationPictureUse = true;
+            prepareLevelListDrawable();
+        } else {
+            mNotificationPictureUse = false;
+        }
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            setClearButtonImage("ic_notify_clear.png");
+            setQuickSettingsImage("ic_notify_quicksettings.png");
+            setNotificationButtonImage("ic_notify_open.png");
+        }else {
+            ((ImageView)mClearButton).setImageDrawable(null);
+            ((ImageView)mClearButton).setImageResource(R.drawable.ic_notify_clear);
+            mSettingsButton.setImageDrawable(null);
+            mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
+            mNotificationButton.setImageDrawable(null);
+            mNotificationButton.setImageResource(R.drawable.ic_notifications);
+        }
+
+        prepareNotificationBackground();
+        updateNotificationBackground();
     }
 
     // ================================================================================
@@ -2658,6 +2758,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         repositionNavigationBar();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         updateShowSearchHoldoff();
+
+        reloadNotifications();
     }
 
     @Override
@@ -3047,19 +3149,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     public void updateNotificationBackground() {
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
         if (forceHobby.equals("true")) {
-            FrameLayout f = (FrameLayout) mNotificationPanel.findViewById(R.id.notification_panel);
             if (requiresRotation()) {
                 if(mNotificationTrackingLandDrawable != null){
                     f.setBackgroundDrawable(mNotificationTrackingLandDrawable);
                 }else if(mNotificationTrackingDrawable != null){
                     f.setBackgroundDrawable(mNotificationTrackingDrawable);
+                }else {
+                    f.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.notification_panel_bg));
                 }
             }else{
                 if(mNotificationTrackingDrawable != null){
                     f.setBackgroundDrawable(mNotificationTrackingDrawable);
+                }else {
+                    f.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.notification_panel_bg));
                 }
             }
+        }else {
+            f.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.notification_panel_bg));
         }
     }
 
@@ -3140,14 +3248,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void registerLevelListDrawable(View v) {
         if(requiresRotation()){
             if(mlevelListLandDrawable != null){
-		LevelListDrawable drawable = (LevelListDrawable) mlevelListLandDrawable.getConstantState().newDrawable();
+                LevelListDrawable drawable = (LevelListDrawable) mlevelListLandDrawable.getConstantState().newDrawable();
                 int nowLevel = (int) (Math.random() * mNotificationPictureNum);
                 drawable.setLevel(nowLevel);
                 ((LatestItemView)v).setDrawable(drawable.getCurrent());
             }
         }else{
             if(mlevelListDrawable != null){
-		LevelListDrawable drawable = (LevelListDrawable) mlevelListDrawable.getConstantState().newDrawable();
+                LevelListDrawable drawable = (LevelListDrawable) mlevelListDrawable.getConstantState().newDrawable();
                 int nowLevel = (int) (Math.random() * mNotificationPictureNum);
                 drawable.setLevel(nowLevel);
                 ((LatestItemView)v).setDrawable(drawable.getCurrent());
@@ -3202,6 +3310,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         Drawable drawable = loadButtonImage(filename);
         if (drawable != null) {
             mSettingsButton.setImageDrawable(drawable);
+        } else {
+            mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
         }
     }
 
@@ -3209,6 +3319,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         Drawable drawable = loadButtonImage(filename);
         if (drawable != null) {
             mNotificationButton.setImageDrawable(drawable);
+        } else {
+            mNotificationButton.setImageResource(R.drawable.ic_notifications);
         }
     }
 
@@ -3216,6 +3328,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         Drawable drawable = loadButtonImage(filename);
         if (drawable != null) {
             ((ImageView)mClearButton).setImageDrawable(drawable);
+        } else {
+            ((ImageView)mClearButton).setImageResource(R.drawable.ic_notify_clear);
         }
     }
 

@@ -40,6 +40,8 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock;
     private Animator mCurrentAnimation;
 
+    private int mRequestedMode;
+
     public PhoneStatusBarTransitions(PhoneStatusBarView view) {
         super(view, R.drawable.status_background);
         mView = view;
@@ -82,6 +84,14 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if(!(forceHobby.equals("true"))) {
+            String gradientStr = SystemProperties.get("persist.sys.prop.gradient");
+            if(!gradientStr.equals("true")) {
+                Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.status_background);
+                mView.setBackgroundDrawable(drawable);
+            }else {
+                Drawable drawable = new ColorDrawable(mView.getContext().getResources().getColor(R.color.system_bar_background_transparent));
+                mView.setBackgroundDrawable(drawable);
+            }
             return;
         }
 
@@ -107,6 +117,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
 
     @Override
     public void transitionTo(int mode, boolean animate) {
+        mRequestedMode = mode;
         super.transitionTo(mode, animate);
         transitionJcrom(mode, animate, false);
     }
@@ -146,5 +157,11 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
             mBattery.setAlpha(newAlphaBC);
             mClock.setAlpha(newAlphaBC);
         }
+    }
+
+    public void initTheme() {
+        //Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.status_background);
+        //mView.setBackgroundDrawable(drawable);
+        transitionJcrom(mRequestedMode, true, false);
     }
 }

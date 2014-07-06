@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.EventLog;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.GestureRecorder;
 
 public class NotificationPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
+    static final String TAG = "NotificationPanelView";
 
     Drawable mHandleBar;
     int mHandleBarHeight;
@@ -63,6 +65,16 @@ public class NotificationPanelView extends PanelView {
             mHandleView = findViewById(R.id.handle);
         }
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
+    }
+
+    public void themeLoad() {
+        Resources resources = getContext().getResources();
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close_jcrom);
+        } else {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        }
     }
 
     @Override

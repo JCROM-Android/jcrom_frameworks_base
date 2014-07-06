@@ -51,6 +51,7 @@ public class DateView extends TextView {
     public static final String THEME_DIRECTORY = "/theme/notification/";
     public static final String CONFIGURATION_FILE = "notification.conf";
     public static final String DATE_COLOR = "color.date";
+    public static final String DEFAULT_TEXT_COLOR = "FFFFFFFF";
     private final String mFilePath;
     private Properties prop;
     private String mColor = null;
@@ -85,8 +86,7 @@ public class DateView extends TextView {
             prop.load(new FileInputStream(filePath));
             mColor = prop.getProperty(propertyName);
         } catch (IOException e) {
-            mColor = null;
-            return;
+            mColor = DEFAULT_TEXT_COLOR;
         }
     }
 
@@ -132,5 +132,10 @@ public class DateView extends TextView {
             setText(text);
             mLastText = text;
         }
+    }
+
+    public void themeLoad() {
+        loadConf(mFilePath, DATE_COLOR);
+        updateClock();
     }
 }

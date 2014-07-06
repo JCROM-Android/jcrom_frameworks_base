@@ -146,6 +146,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     public static final String CONFIGURATION_FILE = "notification.conf";
     public static final String EMERGENCYLABEL_COLOR = "color.emergency";
     public static final String CARRIER_COLOR = "color.carrier";
+    public static final String DEFAULT_TEXT_COLOR = "FFFFFFFF";
     private String mFilePath;
     private Properties prop;
     private String mColorEmergency = null;
@@ -1499,8 +1500,14 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             prop.load(new FileInputStream(filePath));
             return prop.getProperty(propertyName);
         } catch (IOException e) {
-            return null;
+            return DEFAULT_TEXT_COLOR;
         }
+    }
+
+    public void themeLoad() {
+        mColorEmergency = loadConf(mFilePath, EMERGENCYLABEL_COLOR);
+        mColorCarrier = loadConf(mFilePath, CARRIER_COLOR);
+        refreshViews();
     }
 
 }

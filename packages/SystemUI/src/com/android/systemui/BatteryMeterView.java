@@ -245,8 +245,11 @@ public class BatteryMeterView extends View implements DemoMode {
 
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            mBatteryImages = getBatteryImages("battery_%d.png");
-            mPluggedImages = getBatteryImages("battery_plugged_%d.png");
+            int select = SystemProperties.getInt(SELECT_BATTERY_PROPERTY, -1);
+            if (select == SELECT_BATTERY_THEME) {
+                mBatteryImages = getBatteryImages("battery_%d.png");
+                mPluggedImages = getBatteryImages("battery_plugged_%d.png");
+            }
         }
     }
 

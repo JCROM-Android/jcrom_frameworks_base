@@ -496,7 +496,11 @@ public class KeyguardViewMediator {
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
-        mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
+        IntentFilter myfilter = new IntentFilter();
+        myfilter.addAction(DELAYED_KEYGUARD_ACTION);
+        myfilter.addAction(Intent.ACTION_JCROM_THEME_CHANGE);
+        //mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
+        mContext.registerReceiver(mBroadcastReceiver, myfilter);
 
         mKeyguardDisplayManager = new KeyguardDisplayManager(context);
 
@@ -1041,6 +1045,8 @@ public class KeyguardViewMediator {
                         doKeyguardLocked(null);
                     }
                 }
+            } else if ((intent.getAction()).equals(Intent.ACTION_JCROM_THEME_CHANGE)) {
+                themeLoad();
             }
         }
     };
@@ -1395,5 +1401,24 @@ public class KeyguardViewMediator {
 
     public void onBootCompleted() {
         mUpdateMonitor.dispatchBootCompleted();
+    }
+
+    private void themeLoad() {
+        ContentResolver cr = mContext.getContentResolver();
+        mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
+        String soundPath = Settings.Global.getString(cr, Settings.Global.LOCK_SOUND);
+        if (soundPath != null) {
+            mLockSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mLockSoundId == 0) {
+            Log.w(TAG, "failed to load lock sound from " + soundPath);
+        }
+        soundPath = Settings.Global.getString(cr, Settings.Global.UNLOCK_SOUND);
+        if (soundPath != null) {
+            mUnlockSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mUnlockSoundId == 0) {
+            Log.w(TAG, "failed to load unlock sound from " + soundPath);
+        }
     }
 }

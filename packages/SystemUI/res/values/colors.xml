@@ -38,4 +38,6 @@
     <color name="batterymeter_bolt_color">#B2000000</color><!-- 70% black -->
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <drawable name="notification_jcrom_header_bg">#00000000</drawable>
+    <color name="search_panel_background_transparent">#00000000</color>
+    <color name="recent_panel_background_transparent">#00000000</color>
 </resources>

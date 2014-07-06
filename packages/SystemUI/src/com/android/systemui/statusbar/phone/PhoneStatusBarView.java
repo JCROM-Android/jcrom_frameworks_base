@@ -265,4 +265,8 @@ public class PhoneStatusBarView extends PanelBar {
 
         mBar.updateCarrierLabelVisibility(false);
     }
+
+    public void initTheme() {
+        mBarTransitions.initTheme();
+    }
 }

@@ -70,6 +70,14 @@ public final class NavigationBarTransitions extends BarTransitions {
         }
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if(!(forceHobby.equals("true"))) {
+            String gradientStr = SystemProperties.get("persist.sys.prop.gradient");
+            if(!gradientStr.equals("true")) {
+                Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.nav_background);
+                mView.setBackgroundDrawable(drawable);
+            }else {
+                Drawable drawable = new ColorDrawable(mView.getContext().getResources().getColor(R.color.system_bar_background_transparent));
+                mView.setBackgroundDrawable(drawable);
+            }
             return;
         }
 
@@ -236,4 +244,10 @@ public final class NavigationBarTransitions extends BarTransitions {
             return false;
         }
     };
+
+    public void initTheme() {
+        //Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.nav_background);
+        //mView.setBackgroundDrawable(drawable);
+        transitionJcrom(mRequestedMode, true, false);
+    }
 }

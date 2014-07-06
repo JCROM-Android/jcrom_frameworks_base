@@ -132,6 +132,8 @@ public class KeyguardViewManager {
         if (shouldEnableTranslucentDecor()) {
             mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+        } else {
+            mWindowLayoutParams.flags &= ~(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
         if (DEBUG) Log.v(TAG, "show:setSystemUiVisibility(" + Integer.toHexString(visFlags)+")");
         mKeyguardHost.setSystemUiVisibility(visFlags);

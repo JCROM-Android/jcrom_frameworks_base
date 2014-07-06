@@ -462,29 +462,81 @@ public class NavigationBarView extends LinearLayout {
 
     public void setButtonTheme() {
         Drawable drawable;
-        drawable = loadNaviKeyImage("ic_sysbar_back.png");
+        drawable = loadNaviKeyImage("ic_sysbar_back.png", R.drawable.ic_sysbar_back);
         if (drawable != null) {
             mBackIcon = drawable;
         }
-        drawable = loadNaviKeyImage("ic_sysbar_back_land.png");
+        drawable = loadNaviKeyImage("ic_sysbar_back_land.png", R.drawable.ic_sysbar_back_land);
         if (drawable != null) {
             mBackLandIcon = drawable;
         }
-        drawable = loadNaviKeyImage("ic_sysbar_back_ime.png");
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime.png", R.drawable.ic_sysbar_back_ime);
         if (drawable != null) {
             mBackAltIcon = drawable;
         }
-        drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png");
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png", R.drawable.ic_sysbar_back_ime);
         if (drawable != null) {
             mBackAltLandIcon = drawable;
         }
-        drawable = loadNaviKeyImage("ic_sysbar_recent.png");
+        drawable = loadNaviKeyImage("ic_sysbar_recent.png", R.drawable.ic_sysbar_recent);
         if (drawable != null) {
             mRecentIcon = drawable;
         }
-        drawable = loadNaviKeyImage("ic_sysbar_recent_land.png");
+        drawable = loadNaviKeyImage("ic_sysbar_recent_land.png", R.drawable.ic_sysbar_recent_land);
         if (drawable != null) {
             mRecentLandIcon = drawable;
+        }
+    }
+
+    public void setButtonThemeDefault() {
+        Drawable drawable;
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back);
+        if (drawable != null) {
+            mBackIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back_land);
+        if (drawable != null) {
+            mBackLandIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back_ime);
+        if (drawable != null) {
+            mBackAltIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back_ime);
+        if (drawable != null) {
+            mBackAltLandIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_recent);
+        if (drawable != null) {
+            mRecentIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_recent_land);
+        if (drawable != null) {
+            mRecentLandIcon = drawable;
+        }
+    }
+
+    private void setupButtonsDefault(int id, int filenameHorz, int filenameVert) {
+        for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
+            View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
+            if (view instanceof LinearLayout) {
+                boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
+                if (vert) {
+                    setButtonImageDefault(view, id, filenameVert);
+                } else {
+                    setButtonImageDefault(view, id, filenameHorz);
+                }
+            }
+        }
+    }
+
+    private void setButtonImageDefault(View parent, int id, int filename) {
+        View view = parent.findViewById(id);
+        if (view instanceof ImageView) {
+            Drawable drawable = mContext.getResources().getDrawable(filename);
+            if (drawable != null) {
+                ((ImageView)view).setImageDrawable(drawable);
+            }
         }
     }
 
@@ -530,13 +582,33 @@ public class NavigationBarView extends LinearLayout {
 
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if (forceHobby.equals("true")) {
-            setupButtons(R.id.mymenu,      "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png");
-            setupButtons(R.id.home,        "ic_sysbar_home.png",   "ic_sysbar_home_land.png");
-            setupButtons(R.id.expand,      "ic_sysbar_expand.png", "ic_sysbar_expand_land.png");
+            setupButtons(R.id.mymenu, "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png",   R.drawable.ic_sysbar_menu,   R.drawable.ic_sysbar_menu_land);
+            setupButtons(R.id.home,   "ic_sysbar_home.png",   "ic_sysbar_home_land.png",   R.drawable.ic_sysbar_home,   R.drawable.ic_sysbar_home_land);
+            setupButtons(R.id.expand, "ic_sysbar_expand.png", "ic_sysbar_expand_land.png", R.drawable.ic_sysbar_expand, R.drawable.ic_sysbar_expand_land);
             setButtonTheme();
         }
 
         watchForAccessibilityChanges();
+    }
+
+    public void themeLoad() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            setupButtons(R.id.mymenu, "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png",   R.drawable.ic_sysbar_menu,   R.drawable.ic_sysbar_menu_land);
+            setupButtons(R.id.home,   "ic_sysbar_home.png",   "ic_sysbar_home_land.png",   R.drawable.ic_sysbar_home,   R.drawable.ic_sysbar_home_land);
+            setupButtons(R.id.expand, "ic_sysbar_expand.png", "ic_sysbar_expand_land.png", R.drawable.ic_sysbar_expand, R.drawable.ic_sysbar_expand_land);
+            setButtonTheme();
+        }else {
+            setupButtonsDefault(R.id.mymenu,      R.drawable.ic_sysbar_menu,   R.drawable.ic_sysbar_menu_land);
+            setupButtonsDefault(R.id.home,        R.drawable.ic_sysbar_home,   R.drawable.ic_sysbar_home_land);
+            setupButtonsDefault(R.id.expand,      R.drawable.ic_sysbar_expand, R.drawable.ic_sysbar_expand_land);
+            setButtonThemeDefault();
+        }
+        setNavigationIconHints(mNavigationIconHints, true);
+    }
+
+    public void initTheme() {
+        mBarTransitions.initTheme();
     }
 
     private void watchForAccessibilityChanges() {
@@ -586,29 +658,34 @@ public class NavigationBarView extends LinearLayout {
         return mVertical;
     }
 
-    private Drawable loadNaviKeyImage(String filename) {
+    private Drawable loadNaviKeyImage(String filename, int filenameDefault) {
         String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
-        return Drawable.createFromPath(filepath);
+        Drawable drawable = null;
+        drawable = Drawable.createFromPath(filepath);
+        if (drawable == null) {
+            drawable = mContext.getResources().getDrawable(filenameDefault);
+        }
+        return drawable;
     }
 
-    private void setupButtons(int id, String filenameHorz, String filenameVert) {
+    private void setupButtons(int id, String filenameHorz, String filenameVert, int filenameHorzDefault, int filenameVertDefault) {
         for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
             View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
             if (view instanceof LinearLayout) {
                 boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
                 if (vert) {
-                    setButtonImage(view, id, filenameVert);
+                    setButtonImage(view, id, filenameVert, filenameVertDefault);
                 } else {
-                    setButtonImage(view, id, filenameHorz);
+                    setButtonImage(view, id, filenameHorz, filenameHorzDefault);
                 }
             }
         }
     }
 
-    private void setButtonImage(View parent, int id, String filename) {
+    private void setButtonImage(View parent, int id, String filename, int filenameDefault) {
         View view = parent.findViewById(id);
         if (view instanceof ImageView) {
-            Drawable drawable = loadNaviKeyImage(filename);
+            Drawable drawable = loadNaviKeyImage(filename, filenameDefault);
             if (drawable != null) {
                 ((ImageView)view).setImageDrawable(drawable);
             }
@@ -658,28 +735,6 @@ public class NavigationBarView extends LinearLayout {
         postCheckForInvalidLayout("sizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
     }
-
-    /*
-    @Override
-    protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) Log.d(TAG, String.format(
-                    "onLayout: %s (%d,%d,%d,%d)",
-                    changed?"changed":"notchanged", left, top, right, bottom));
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
-    // uncomment this for extra defensiveness in WORKAROUND_INVALID_LAYOUT situations: if all else
-    // fails, any touch on the display will fix the layout.
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.d(TAG, "onInterceptTouchEvent: " + ev.toString());
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            postCheckForInvalidLayout("touch");
-        }
-        return super.onInterceptTouchEvent(ev);
-    }
-    */
-
 
     private String getResourceName(int resId) {
         if (resId != 0) {
