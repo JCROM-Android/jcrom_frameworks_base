@@ -410,6 +410,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mDateView.themeLoad();
             mStatusBarView.initTheme();
             mNotificationPanel.themeLoad();
+            if (mHasSettingsPanel) {
+                mSettingsPanel.themeLoad();
+            }
             initNotifications();
         }
     }
@@ -477,14 +480,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (forceHobby.equals("true")) {
             setClearButtonImage("ic_notify_clear.png");
             setQuickSettingsImage("ic_notify_quicksettings.png");
-            setNotificationButtonImage("ic_notify_open.png");
+            if (mNotificationButton != null) {
+                setNotificationButtonImage("ic_notify_open.png");
+            }
         }else {
             ((ImageView)mClearButton).setImageDrawable(null);
             ((ImageView)mClearButton).setImageResource(R.drawable.ic_notify_clear);
             mSettingsButton.setImageDrawable(null);
             mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
-            mNotificationButton.setImageDrawable(null);
-            mNotificationButton.setImageResource(R.drawable.ic_notifications);
+            if (mNotificationButton != null) {
+                mNotificationButton.setImageDrawable(null);
+                mNotificationButton.setImageResource(R.drawable.ic_notifications);
+            }
         }
 
         prepareNotificationBackground();

@@ -68,6 +68,16 @@ public class SettingsPanelView extends PanelView {
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
     }
 
+    public void themeLoad() {
+        Resources resources = getContext().getResources();
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close_jcrom);
+        } else {
+            mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        }
+    }
+
     public void setQuickSettings(QuickSettings qs) {
         mQS = qs;
     }
