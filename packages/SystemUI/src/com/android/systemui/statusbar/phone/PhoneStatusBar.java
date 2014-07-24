@@ -410,7 +410,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mDateView.themeLoad();
             mStatusBarView.initTheme();
             mNotificationPanel.themeLoad();
-            if (mHasSettingsPanel) {
+            if (mSettingsPanel != null) {
                 mSettingsPanel.themeLoad();
             }
             initNotifications();
