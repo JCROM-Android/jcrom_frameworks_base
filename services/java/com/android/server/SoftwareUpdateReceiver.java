@@ -37,7 +37,8 @@ public class SoftwareUpdateReceiver extends BroadcastReceiver {
             public void run() {
                 try {
 					File UpdateFile = new File("/cache/jcrom.zip");
-                    RecoverySystem.installPackage(context, UpdateFile);
+                    File GappsFile = new File("/cache/gapps.zip");
+                    RecoverySystem.installPackage(context, UpdateFile, GappsFile);
                     Log.wtf(TAG, "Still running after software update?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform software update", e);
