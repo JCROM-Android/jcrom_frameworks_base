@@ -84,12 +84,17 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
         String forceHobby = SystemProperties.get("persist.sys.force.hobby");
         if(!(forceHobby.equals("true"))) {
-            String gradientStr = SystemProperties.get("persist.sys.prop.gradient");
-            if(!gradientStr.equals("true")) {
-                Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.status_background);
-                mView.setBackgroundDrawable(drawable);
-            }else {
-                Drawable drawable = new ColorDrawable(mView.getContext().getResources().getColor(R.color.system_bar_background_transparent));
+            if(mode == MODE_TRANSLUCENT) {
+                String gradientStr = SystemProperties.get("persist.sys.prop.gradient");
+                if(!gradientStr.equals("true")) {
+                    Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.status_background);
+                    mView.setBackgroundDrawable(drawable);
+                } else {
+                    Drawable drawable = new ColorDrawable(mView.getContext().getResources().getColor(R.color.system_bar_background_transparent));
+                    mView.setBackgroundDrawable(drawable);
+                }
+            } else {
+                Drawable drawable = mView.getContext().getResources().getDrawable(R.drawable.system_bar_background);
                 mView.setBackgroundDrawable(drawable);
             }
             return;
