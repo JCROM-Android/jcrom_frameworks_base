@@ -135,7 +135,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private Runnable mPostBootCompletedRunnable;
 
-    private ImageView mLockScreenWallpaperImage;
+    private ImageView mLockScreenWallpaperImage = null;
 
     Bitmap bitmapWallpaper;
 
@@ -1541,12 +1541,16 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
             if (DEBUGXPORT) Log.v(TAG, "add transport at " + position);
             mAppWidgetContainer.addWidget(getOrCreateTransportControl(), position);
+            if(mLockScreenWallpaperImage != null){
+                removeView(mLockScreenWallpaperImage);
+            }
             return true;
         } else if (showing && state == TRANSPORT_GONE) {
             if (DEBUGXPORT) Log.v(TAG, "remove transport");
             mAppWidgetContainer.removeWidget(getOrCreateTransportControl());
             mTransportControl = null;
             KeyguardUpdateMonitor.getInstance(getContext()).dispatchSetBackground(null);
+            setLockScreenWallpaper();
         }
         return false;
     }
@@ -1772,7 +1776,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (forceHobby.equals("true")) {
             mLockScreenWallpaperImage = new ImageView(getContext());
             mLockScreenWallpaperImage.setScaleType(ScaleType.CENTER_CROP);
-            addView(mLockScreenWallpaperImage, -1, -1);
+            addView(mLockScreenWallpaperImage, 0, new FrameLayout.LayoutParams(-1, -1));
 
             Drawable drawable = null;
             if (requiresRotation()) {
