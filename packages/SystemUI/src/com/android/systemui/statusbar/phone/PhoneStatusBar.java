@@ -1142,6 +1142,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
+    private View.OnLongClickListener mExpandLongClickListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            //toggleExpandPanael();
+            return true;
+        }
+    };
+
+    private View.OnClickListener mExpandClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            if (mExpandedVisible) {
+                animateCollapsePanels();
+            } else {
+                animateExpandNotificationsPanel();
+            }
+        }
+    };
+
     private long mLastLockToAppLongPress;
     private View.OnLongClickListener mLongPressBackRecentsListener =
             new View.OnLongClickListener() {
@@ -1197,6 +1214,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
         mNavigationBarView.getRecentsButton().setLongClickable(true);
         mNavigationBarView.getRecentsButton().setOnLongClickListener(mLongPressBackRecentsListener);
+        mNavigationBarView.getExpandButton().setOnClickListener(mExpandClickListener);
+        mNavigationBarView.getExpandButton().setOnLongClickListener(mExpandLongClickListener);
         mNavigationBarView.getBackButton().setLongClickable(true);
         mNavigationBarView.getBackButton().setOnLongClickListener(mLongPressBackRecentsListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
@@ -4355,4 +4374,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotificationBackground();
     }
 
+    public void toggleExpandPanael() {
+/*
+        if (mExpandedVisible) {
+            if (mStatusBarView.hasFullWidthNotifications()) { // Phone
+                flipPanels();
+            } else { // Phone(Large)
+                if(mSettingsPanel.getVisibility() != View.VISIBLE) {
+                    animateExpandSettingsPanel();
+                } else {
+                    animateExpandNotificationsPanel();
+                }
+            }
+        }
+*/
+    }
 }
