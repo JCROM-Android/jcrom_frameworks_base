@@ -106,11 +106,12 @@
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
 
     <!-- The width of the view containing non-menu status bar icons -->
-    <dimen name="navigation_key_width">72dip</dimen>
-    <dimen name="navigation_key_height">72dip</dimen>
+    <dimen name="navigation_key_width">64dip</dimen>
+    <dimen name="navigation_key_height">64dip</dimen>
 
     <!-- The width of the view containing the menu/ime navigation bar icons -->
-    <dimen name="navigation_extra_key_width">40dip</dimen>
+    <dimen name="navigation_extra_key_width">20dip</dimen>
+    <dimen name="navigation_extra_key_height">20dip</dimen>
 
     <!-- Default distance beyond which snaps to the matching target -->
     <dimen name="navbar_search_snap_margin">40dip</dimen>

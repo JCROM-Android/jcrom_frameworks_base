@@ -320,7 +320,7 @@ public class NavigationBarView extends LinearLayout {
         ((ImageView)getRecentsButton()).setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
 
         final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
-        //getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
+        getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         // Update menu button in case the IME state has changed.
         setMenuVisibility(mShowMenu, true);
 
@@ -398,12 +398,12 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setMenuVisibility(final boolean show) {
-        //setMenuVisibility(show, false);
-        return;
+        setMenuVisibility(show, false);
+        //return;
     }
 
     public void setMenuVisibility(final boolean show, final boolean force) {
-/*
+
         if (!force && mShowMenu == show) return;
 
         mShowMenu = show;
@@ -412,8 +412,8 @@ public class NavigationBarView extends LinearLayout {
         final boolean shouldShow = mShowMenu &&
                 ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
         getMenuButton().setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
-*/
-        return;
+
+        //return;
     }
 
     @Override
@@ -427,7 +427,7 @@ public class NavigationBarView extends LinearLayout {
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
 
-        //getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
+        getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         updateRTLOrder();
     }
@@ -444,7 +444,7 @@ public class NavigationBarView extends LinearLayout {
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
 
-        //getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
+        getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
 
