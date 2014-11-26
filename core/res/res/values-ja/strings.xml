@@ -1783,4 +1783,12 @@
     <item quantity="other" msgid="5408537517529822157">"%d時間"</item>
   </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"制限なし"</string>
+
+    <string name="global_action_reboot">再起動</string>
+    <string name="reboot_system" product="tablet">端末の再起動</string>
+    <string name="reboot_system" product="default">端末の再起動</string>
+    <string name="reboot_reboot">再起動</string>
+    <string name="reboot_recovery">recovery mode で起動</string>
+    <string name="reboot_bootloader">fastboot mode で起動</string>
+
 </resources>

@@ -94,6 +94,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /* Valid settings for global actions keys.
      * see config.xml config_globalActionList */
     private static final String GLOBAL_ACTION_KEY_POWER = "power";
+    private static final String GLOBAL_ACTION_KEY_REBOOT = "reboot";
     private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
     private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
@@ -121,6 +122,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private final boolean mShowSilentToggle;
+
+    private String mRebootReason = null;
 
     /**
      * @param context everything needs a context :(
@@ -272,6 +275,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
                 mItems.add(new PowerAction());
+            } else if (GLOBAL_ACTION_KEY_REBOOT.equals(actionKey)) {
+                mItems.add(getRebootAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
@@ -409,6 +414,51 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         com.android.internal.R.string.bugreport_status,
                         Build.VERSION.RELEASE,
                         Build.ID);
+            }
+        };
+    }
+
+    private Action getRebootAction() {
+        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_reboot,
+                R.string.global_action_reboot) {
+
+            @Override
+            public void onPress() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle(com.android.internal.R.string.reboot_system);
+                builder.setSingleChoiceItems(com.android.internal.R.array.shutdown_reboot_options, 0, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (which < 0) {
+                                return;
+                            }
+                            String actions[] = mContext.getResources().getStringArray(com.android.internal.R.array.shutdown_reboot_actions);
+                            if (actions != null && which < actions.length) {
+                                mRebootReason = actions[which];
+                            }
+                        }
+                    });
+                builder.setNegativeButton(com.android.internal.R.string.cancel, null);
+                builder.setPositiveButton(com.android.internal.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SystemProperties.set("sys.shutdown.user.requested", "true");
+                            mWindowManagerFuncs.reboot(mRebootReason);
+                        }
+                    });
+                AlertDialog dialog = builder.create();
+                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+                dialog.show();
+            }
+
+            @Override
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            @Override
+            public boolean showBeforeProvisioning() {
+                return true;
             }
         };
     }

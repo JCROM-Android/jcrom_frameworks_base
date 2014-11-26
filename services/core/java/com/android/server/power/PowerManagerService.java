@@ -2294,8 +2294,15 @@ public final class PowerManagerService extends SystemService
             // This preparation can take more than 20 seconds if
             // there's a very large update package, so lengthen the
             // timeout.
-            SystemProperties.set("ctl.start", "pre-recovery");
-            duration = 120 * 1000L;
+            String requested = SystemProperties.get("sys.shutdown.user.requested", "false");
+            SystemProperties.set("sys.shutdown.user.requested", "false");
+            if (requested.equals("true")) {
+                SystemProperties.set("sys.powerctl", "reboot," + reason);
+                duration = 20 * 1000L;
+            } else {
+                SystemProperties.set("ctl.start", "pre-recovery");
+                duration = 120 * 1000L;
+            }
         } else {
             SystemProperties.set("sys.powerctl", "reboot," + reason);
             duration = 20 * 1000L;

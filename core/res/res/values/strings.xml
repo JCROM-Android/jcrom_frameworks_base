@@ -4886,4 +4886,12 @@
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever">Indefinitely</string>
+
+    <string name="global_action_reboot">Reboot</string>
+    <string name="reboot_system" product="tablet">Reboot tablet</string>
+    <string name="reboot_system" product="default">Reboot phone</string>
+    <string name="reboot_reboot">Reboot</string>
+    <string name="reboot_recovery">Recovery</string>
+    <string name="reboot_bootloader">Bootloader</string>
+
 </resources>
