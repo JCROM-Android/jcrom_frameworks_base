@@ -1144,7 +1144,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private View.OnLongClickListener mExpandLongClickListener = new View.OnLongClickListener() {
         public boolean onLongClick(View v) {
-            //toggleExpandPanael();
+            toggleExpandPanael();
             return true;
         }
     };
@@ -2413,6 +2413,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mNotificationPanel.expand();
+        mNotificationPanel.closeQs();
 
         if (false) postStartTracing();
     }
@@ -4375,18 +4376,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void toggleExpandPanael() {
-/*
         if (mExpandedVisible) {
-            if (mStatusBarView.hasFullWidthNotifications()) { // Phone
-                flipPanels();
-            } else { // Phone(Large)
-                if(mSettingsPanel.getVisibility() != View.VISIBLE) {
-                    animateExpandSettingsPanel();
-                } else {
-                    animateExpandNotificationsPanel();
-                }
+            if (!mNotificationPanel.isQsExpanded()) {
+                animateExpandSettingsPanel();
+            } else {
+                animateExpandNotificationsPanel();
             }
         }
-*/
     }
 }

@@ -78,6 +78,7 @@ public class KeyButtonView extends ImageView {
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
                     performLongClick();
+                    setPressed(false);
                 } else {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
@@ -192,12 +193,14 @@ public class KeyButtonView extends ImageView {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+/*
                 x = (int)ev.getX();
                 y = (int)ev.getY();
                 setPressed(x >= -mTouchSlop
                         && x < getWidth() + mTouchSlop
                         && y >= -mTouchSlop
                         && y < getHeight() + mTouchSlop);
+*/
                 break;
             case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
