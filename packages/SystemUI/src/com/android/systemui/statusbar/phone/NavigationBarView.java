@@ -47,6 +47,11 @@ import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
+import android.os.SystemProperties;
+import java.io.File;
+import android.widget.FrameLayout;
+import android.os.Environment;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -288,6 +293,11 @@ public class NavigationBarView extends LinearLayout {
         getIcons(getContext().getResources());
 
         super.setLayoutDirection(layoutDirection);
+
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            setButtonTheme();
+        }
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -416,6 +426,113 @@ public class NavigationBarView extends LinearLayout {
         //return;
     }
 
+    public void setButtonTheme() {
+        Drawable drawable;
+        drawable = loadNaviKeyImage("ic_sysbar_back.png", R.drawable.ic_sysbar_back);
+        if (drawable != null) {
+            mBackIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_land.png", R.drawable.ic_sysbar_back_land);
+        if (drawable != null) {
+            mBackLandIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime.png", R.drawable.ic_sysbar_back_ime);
+        if (drawable != null) {
+            mBackAltIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_back_ime_land.png", R.drawable.ic_sysbar_back_ime);
+        if (drawable != null) {
+            mBackAltLandIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_recent.png", R.drawable.ic_sysbar_recent);
+        if (drawable != null) {
+            mRecentIcon = drawable;
+        }
+        drawable = loadNaviKeyImage("ic_sysbar_recent_land.png", R.drawable.ic_sysbar_recent_land);
+        if (drawable != null) {
+            mRecentLandIcon = drawable;
+        }
+    }
+
+    public void setButtonThemeDefault() {
+        Drawable drawable;
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back);
+        if (drawable != null) {
+            mBackIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back_land);
+        if (drawable != null) {
+            mBackLandIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back_ime);
+        if (drawable != null) {
+            mBackAltIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_back_ime);
+        if (drawable != null) {
+            mBackAltLandIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_recent);
+        if (drawable != null) {
+            mRecentIcon = drawable;
+        }
+        drawable = mContext.getResources().getDrawable(R.drawable.ic_sysbar_recent_land);
+        if (drawable != null) {
+            mRecentLandIcon = drawable;
+        }
+    }
+
+    private void setupButtonsDefault(int id, int filenameHorz, int filenameVert) {
+        for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
+            View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
+            if (view instanceof LinearLayout) {
+                boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
+                if (vert) {
+                    setButtonImageDefault(view, id, filenameVert);
+                } else {
+                    setButtonImageDefault(view, id, filenameHorz);
+                }
+            }
+        }
+    }
+
+    private void setButtonImageDefault(View parent, int id, int filename) {
+        View view = parent.findViewById(id);
+        if (view instanceof ImageView) {
+            Drawable drawable = mContext.getResources().getDrawable(filename);
+            if (drawable != null) {
+                ((ImageView)view).setImageDrawable(drawable);
+            }
+        }
+    }
+
+    private Drawable getDrawableFromFile(String DIR, String MY_FILE_NAME) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(Environment.getDataDirectory().toString() + "/theme/"+DIR+"/");
+        builder.append(File.separator);
+        builder.append(MY_FILE_NAME);
+        String filePath = builder.toString();
+        String extension = checkThemeFile(filePath);
+        return Drawable.createFromPath(filePath + extension);
+    }
+
+    private String checkThemeFile(String filename) {
+        String extension = ".png";
+        File file = null;
+
+        file = new File(filename + ".png");
+        if(file.exists()) {
+            extension = ".png";
+        }else {
+            file = new File(filename + ".jpg");
+            if(file.exists()) {
+                extension = ".jpg";
+            }
+        }
+
+        return extension;
+    }
+
     @Override
     public void onFinishInflate() {
         mRotatedViews[Surface.ROTATION_0] =
@@ -427,9 +544,67 @@ public class NavigationBarView extends LinearLayout {
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
 
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            setupButtons(R.id.mymenu, "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png",   R.drawable.ic_sysbar_menu_big,   R.drawable.ic_sysbar_menu_big_land);
+            setupButtons(R.id.home,   "ic_sysbar_home.png",   "ic_sysbar_home_land.png",   R.drawable.ic_sysbar_home,   R.drawable.ic_sysbar_home_land);
+            setupButtons(R.id.expand, "ic_sysbar_expand.png", "ic_sysbar_expand_land.png", R.drawable.ic_sysbar_expand, R.drawable.ic_sysbar_expand_land);
+            setButtonTheme();
+        }
+
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         updateRTLOrder();
+    }
+
+    public void themeLoad() {
+        String forceHobby = SystemProperties.get("persist.sys.force.hobby");
+        if (forceHobby.equals("true")) {
+            setupButtons(R.id.mymenu, "ic_sysbar_menu.png",   "ic_sysbar_menu_land.png",   R.drawable.ic_sysbar_menu_big,   R.drawable.ic_sysbar_menu_big_land);
+            setupButtons(R.id.home,   "ic_sysbar_home.png",   "ic_sysbar_home_land.png",   R.drawable.ic_sysbar_home,   R.drawable.ic_sysbar_home_land);
+            setupButtons(R.id.expand, "ic_sysbar_expand.png", "ic_sysbar_expand_land.png", R.drawable.ic_sysbar_expand, R.drawable.ic_sysbar_expand_land);
+            setButtonTheme();
+        }else {
+            setupButtonsDefault(R.id.mymenu,      R.drawable.ic_sysbar_menu_big,   R.drawable.ic_sysbar_menu_big_land);
+            setupButtonsDefault(R.id.home,        R.drawable.ic_sysbar_home,   R.drawable.ic_sysbar_home_land);
+            setupButtonsDefault(R.id.expand,      R.drawable.ic_sysbar_expand, R.drawable.ic_sysbar_expand_land);
+            setButtonThemeDefault();
+        }
+        setNavigationIconHints(mNavigationIconHints, true);
+    }
+
+    private Drawable loadNaviKeyImage(String filename, int filenameDefault) {
+        String filepath = Environment.getDataDirectory().toString() + "/theme/navikey/" + filename;
+        Drawable drawable = null;
+        drawable = Drawable.createFromPath(filepath);
+        if (drawable == null) {
+            drawable = mContext.getResources().getDrawable(filenameDefault);
+        }
+        return drawable;
+    }
+
+    private void setupButtons(int id, String filenameHorz, String filenameVert, int filenameHorzDefault, int filenameVertDefault) {
+        for (int rot: new int[] { Surface.ROTATION_0, Surface.ROTATION_90 }) {
+            View view = mRotatedViews[rot].findViewById(R.id.nav_buttons);
+            if (view instanceof LinearLayout) {
+                boolean vert = (((LinearLayout)view).getOrientation() == LinearLayout.VERTICAL);
+                if (vert) {
+                    setButtonImage(view, id, filenameVert, filenameVertDefault);
+                } else {
+                    setButtonImage(view, id, filenameHorz, filenameHorzDefault);
+                }
+            }
+        }
+    }
+
+    private void setButtonImage(View parent, int id, String filename, int filenameDefault) {
+        View view = parent.findViewById(id);
+        if (view instanceof ImageView) {
+            Drawable drawable = loadNaviKeyImage(filename, filenameDefault);
+            if (drawable != null) {
+                ((ImageView)view).setImageDrawable(drawable);
+            }
+        }
     }
 
     public boolean isVertical() {

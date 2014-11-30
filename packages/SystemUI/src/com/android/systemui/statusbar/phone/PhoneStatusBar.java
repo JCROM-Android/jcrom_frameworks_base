@@ -632,6 +632,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private final class JCReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context content, Intent intent) {
+            mNavigationBarView.themeLoad();
             mNotificationPanel.themeLoad();
             initNotifications();
         }
