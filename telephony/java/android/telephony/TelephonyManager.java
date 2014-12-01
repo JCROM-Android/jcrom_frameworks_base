@@ -80,6 +80,8 @@ public class TelephonyManager {
 
     private final Context mContext;
 
+    private static final String VOICE_CAPABLE_PROPERTY = "persist.sys.voice.capable";
+
     private static String multiSimConfig =
             SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
 
@@ -2287,8 +2289,9 @@ public class TelephonyManager {
      */
     public boolean isVoiceCapable() {
         if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
+        //return mContext.getResources().getBoolean(
+        //        com.android.internal.R.bool.config_voice_capable);
+        return SystemProperties.getBoolean(VOICE_CAPABLE_PROPERTY, true);
     }
 
     /**
