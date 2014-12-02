@@ -276,8 +276,8 @@
                 android:layout_weight="1"
                 />
             <View
-                android:layout_width="@dimen/navigation_extra_key_height"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/navigation_extra_key_height"
                 android:layout_weight="0"
                 android:visibility="invisible"
                 />
