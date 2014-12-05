@@ -29,6 +29,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -48,9 +49,16 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
+    private static final String SELECT_BATTERY_PROPERTY = "persist.sys.battery.select";
+
+    private static final int SELECT_BATTERY_NORMAL = 0;
+    private static final int SELECT_BATTERY_PERCENTAGE = 1;
+    private static final int SELECT_BATTERY_THEME = 2;
+
     private final int[] mColors;
 
     boolean mShowPercent = true;
+    int mSelectBattery = SELECT_BATTERY_NORMAL;
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
@@ -204,6 +212,10 @@ public class BatteryMeterView extends View implements DemoMode,
         atts.recycle();
         mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
                 context.getContentResolver(), "status_bar_show_battery_percent", 0);
+        mSelectBattery = SystemProperties.getInt(SELECT_BATTERY_PROPERTY, SELECT_BATTERY_NORMAL);
+        if (mSelectBattery == SELECT_BATTERY_PERCENTAGE) {
+            mShowPercent = true;
+        }
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
