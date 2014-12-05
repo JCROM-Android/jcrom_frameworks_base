@@ -634,6 +634,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         public void onReceive(Context content, Intent intent) {
             mNavigationBarView.themeLoad();
             mNotificationPanel.themeLoad();
+            mSearchPanelView.themeLoad();
             initNotifications();
         }
     }
