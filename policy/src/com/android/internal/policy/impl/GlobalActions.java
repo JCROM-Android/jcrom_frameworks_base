@@ -575,12 +575,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void refreshSilentMode() {
+/*
         if (!mHasVibrator) {
             final boolean silentModeOn =
                     mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
             ((ToggleAction)mSilentModeAction).updateState(
                     silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
         }
+*/
     }
 
     /** {@inheritDoc} */
