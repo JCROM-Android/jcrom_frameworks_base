@@ -117,6 +117,7 @@ import android.os.MessageQueue.IdleHandler;
 import android.os.PowerManagerInternal;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -361,6 +362,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     new PowerManagerInternal.LowPowerModeListener() {
                 @Override
                 public void onLowPowerModeChanged(boolean enabled) {
+                    boolean disableBackground = SystemProperties.getBoolean("persist.sys.background", true);
+                    enabled = (enabled && disableBackground);
                     synchronized (mRulesLock) {
                         if (mRestrictPower != enabled) {
                             mRestrictPower = enabled;

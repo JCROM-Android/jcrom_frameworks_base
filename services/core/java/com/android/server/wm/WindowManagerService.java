@@ -832,6 +832,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 new PowerManagerInternal.LowPowerModeListener() {
             @Override
             public void onLowPowerModeChanged(boolean enabled) {
+                boolean disableAnimation = SystemProperties.getBoolean("persist.sys.animation", true);
+                enabled = (enabled && disableAnimation);
                 synchronized (mWindowMap) {
                     if (mAnimationsDisabled != enabled) {
                         mAnimationsDisabled = enabled;

@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Binder;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.os.WorkSource;
@@ -470,6 +471,8 @@ public class VibratorService extends IVibratorService.Stub
                 }
 
                 mLowPowerMode = mPowerManagerInternal.getLowPowerModeEnabled();
+                boolean disableVibrator = SystemProperties.getBoolean("persist.sys.vibrator", true);
+                mLowPowerMode = (mLowPowerMode && disableVibrator);
 
                 if (mVibrateInputDevicesSetting) {
                     if (!mInputDeviceListenerRegistered) {
